@@ -31,7 +31,7 @@ namespace store_management.Features.Customers
 
         public class Command : IRequest<CustomerEnvelope>
         {
-            public CustomerData Customer;
+            public CustomerData Customer { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
