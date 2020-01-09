@@ -9,6 +9,6 @@ namespace store_management.Infrastructure.Errors
     {
         public static string NOT_FOUND = "not found";
         public static string IN_USE = "in use";
-        public static string EXISTED = "already existed"
+        public static string EXISTED = "already existed";
     }
 }
