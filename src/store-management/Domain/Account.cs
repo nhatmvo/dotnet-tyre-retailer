@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -16,6 +17,9 @@ namespace store_management.Domain
         public string Username { get; set; }
         public string Password { get; set; }
         public string Salt { get; set; }
+
+        [NotMapped]
+        public string Token { get; set; }
 
         public virtual ICollection<Invoice> Invoice { get; set; }
         public virtual ICollection<OperationHistory> OperationHistory { get; set; }
