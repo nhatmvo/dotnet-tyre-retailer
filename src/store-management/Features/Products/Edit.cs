@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 
 namespace store_management.Features.Products
 {
@@ -24,6 +25,7 @@ namespace store_management.Features.Products
             public string Pattern { get; set; }
             public string ImagePath { get; set; }
             public decimal Price { get; set; }
+            public decimal ImportPrice { get; set; }
             public int Quantity { get; set; }
             public string Description { get; set; }
         }
@@ -61,6 +63,26 @@ namespace store_management.Features.Products
                 if (productToUpdate == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
 
+                if (request.ProductData.Price != 0 || request.ProductData.ImportPrice != 0)
+                {
+                    var pHistory  = _context.PriceFluctuation.FromSqlRaw($"SELECT IMPORT_PRICE FROM PRICE_FLUCTUATION " +
+                        $"WHERE PRODUCT_ID = '{request.Id}' ORDER BY DATE DESC").FirstOrDefault();
+                    var priceFluctuation = new PriceFluctuation
+                    {
+                        Id = Guid.NewGuid().ToByteArray(),
+                        ChangedImportPrice = request.ProductData.ImportPrice != 0 ? request.ProductData.ImportPrice : pHistory.ChangedImportPrice,
+                        CurrentImportPrice = pHistory.ChangedImportPrice,
+                        ChangedPrice = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price,
+                        CurrentPrice = pHistory.ChangedPrice,
+                        Date = DateTime.Now,
+                        ProductId = (new Guid(request.Id)).ToByteArray()
+                        
+                    };
+                    await _context.PriceFluctuation.AddAsync(priceFluctuation);
+                }
+
+
+                // check properties of product to insert
                 productToUpdate.Name = request.ProductData.Name ?? productToUpdate.Name;
                 productToUpdate.Type = request.ProductData.Type ?? productToUpdate.Type;
                 productToUpdate.Size = request.ProductData.Size ?? productToUpdate.Size;
@@ -68,13 +90,23 @@ namespace store_management.Features.Products
                 productToUpdate.Pattern = request.ProductData.Pattern ?? productToUpdate.Pattern;
                 productToUpdate.ImagePath = request.ProductData.ImagePath ?? productToUpdate.ImagePath;
                 productToUpdate.Price = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price;
-                productToUpdate.Quality = request.ProductData.Quantity != 0 ? request.ProductData.Quantity : productToUpdate.Quality;
+                productToUpdate.QuantityRemain = request.ProductData.Quantity != 0 ? request.ProductData.Quantity : productToUpdate.QuantityRemain;
                 productToUpdate.Description = request.ProductData.Description ?? productToUpdate.Description;
 
                 // Update last modify by and last modify date
                 productToUpdate.ModifyDate = DateTime.Now;
 
                 _context.Product.Update(productToUpdate);
+
+                //var reportHistory = new TxReport
+                //{
+                //    Id = Guid.NewGuid().ToByteArray(),
+                //    Action = ActionConstants.EDIT_PRODUCT,
+                //    CreateTime = DateTime.Now,
+                //    ProductId = new Guid(request.Id).ToByteArray(),
+                //    QuantityUpdate = request.ProductData.Quantity
+                //};
+
                 await _context.SaveChangesAsync();
 
                 return new ProductEnvelope(productToUpdate);

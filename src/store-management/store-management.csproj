@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="scaffold.bat" />
+    <None Remove="store-managemenet-erd.mwb" />
+    <None Remove="store-management.db" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Domain\" />
   </ItemGroup>
 
