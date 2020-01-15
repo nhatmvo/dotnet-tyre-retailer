@@ -85,7 +85,6 @@ namespace store_management.Features.Transactions
                     lines.Add(new InvoiceLine()
                     {
                         Id = Guid.NewGuid().ToByteArray(),
-                        ProductId = (new Guid(part.ProductId)).ToByteArray(),
                         Quantity = part.Quantity,
                         Total = part.Quantity * productLine.Price,
                         Description = part.Description,

@@ -24,6 +24,7 @@ namespace store_management.Features.Products
             public string Pattern { get; set; }
             public string ImagePath { get; set; }
             public decimal Price { get; set; }
+            public decimal ImportPrice { get; set; }
             public int Quantity { get; set; }
             public string Description { get; set; }
         }
@@ -72,23 +73,34 @@ namespace store_management.Features.Products
                 var product = await _context.Product.FirstOrDefaultAsync(p => p.Name == request.ProductData.Name);
                 if (product != null)
                     throw new RestException(HttpStatusCode.BadRequest, new { Product = Constants.EXISTED });
+                var productId = Guid.NewGuid().ToByteArray();
                 var productToCreate = new Product()
                 {
-                    Id = Guid.NewGuid().ToByteArray(),
+                    Id = productId,
                     Name = request.ProductData.Name,
                     Type = request.ProductData.Type,
                     Brand = request.ProductData.Brand,
                     Pattern = request.ProductData.Pattern,
                     Price = request.ProductData.Price,
-                    Quality = request.ProductData.Quantity,
+                    QuantityRemain = request.ProductData.Quantity,
                     Description = request.ProductData.Description,
                     CreatedDate = DateTime.Now
                     // Add created person
                 };
-
+                // Add product
                 await _context.Product.AddAsync(product);
-                await _context.SaveChangesAsync();
+                // Then create price table ()
+                var priceFluctuation = new PriceFluctuation {
+                    Id = Guid.NewGuid().ToByteArray(),
+                    ChangedImportPrice = request.ProductData.ImportPrice,
+                    ChangedPrice = request.ProductData.Price,
+                    Date = DateTime.Now,
+                    ProductId = productId
+                };
+                await _context.PriceFluctuation.AddAsync(priceFluctuation);
 
+                await _context.SaveChangesAsync();
+                
                 return new ProductEnvelope(product);
             }
         }

@@ -22,7 +22,7 @@ namespace store_management
 {
     public class Startup
     {
-        public const string DEFAULT_CONNECTION_STRING = "Server=localhost;Port=32769;Database=TIRE_STORE_MANAGEMENT;User=root;Password=nhat1997;";
+        public const string DEFAULT_CONNECTION_STRING = "Server=localhost;Port=32769;Database=TIRE_STORE_ALTER;User=root;Password=nhat1997;";
         public const string DEFAULT_DATABASE_PROVIDER = "mysql";
 
         public IConfiguration Configuration { get; }

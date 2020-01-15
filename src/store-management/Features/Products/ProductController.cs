@@ -20,7 +20,7 @@ namespace store_management.Features.Products
         }
 
         [HttpGet]
-        public async Task<ProductEnvelope> Get(string id)
+        public async Task<ProductEnvelope> Get(string id, bool getDetailHistory)
         {
             return await _mediator.Send(new Details.Query(id));
         }
