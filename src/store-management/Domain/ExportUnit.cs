@@ -12,6 +12,7 @@ namespace store_management.Domain
         public decimal? ExportPrice { get; set; }
         public int? Quantity { get; set; }
         public bool? Billing { get; set; }
+        public DateTime? ExportDatetime { get; set; }
         public byte[] InvoiceLineId { get; set; }
 
         public virtual InvoiceLine InvoiceLine { get; set; }

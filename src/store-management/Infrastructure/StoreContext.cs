@@ -115,6 +115,10 @@ namespace store_management.Domain
 
                 entity.Property(e => e.Billing).HasColumnName("BILLING");
 
+                entity.Property(e => e.ExportDatetime)
+                    .HasColumnName("EXPORT_DATETIME")
+                    .HasColumnType("datetime");
+
                 entity.Property(e => e.ExportPrice)
                     .HasColumnName("EXPORT_PRICE")
                     .HasColumnType("decimal(13,4)");

@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,21 +29,20 @@ namespace store_management.Features.Transactions
             }
         }
 
-        public class Command : IRequest<TransactionEnvelope>
+        public class Command : IRequest<TransactionsEnvelope>
         {
-            public string CustomerId { get; set; }
-            public InvoiceTypes InvoiceStatus { get; set; }
-            public string Detail { get; set; }
-            // according with InvoiceLine value
-            public List<TransactionData> TransactionParts { get; set; }
+            public TransactionData TransactionData { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
-
+            public CommandValidator()
+            {
+                RuleFor(x => x.TransactionData).NotNull().SetValidator(new TransactionValidation());
+            }
         }
 
-        public class Handler : IRequestHandler<Command, TransactionEnvelope>
+        public class Handler : IRequestHandler<Command, TransactionsEnvelope>
         {
             private readonly StoreContext _context;
             private readonly ICurrentUserAccessor _currentUserAccessor;
@@ -54,49 +54,56 @@ namespace store_management.Features.Transactions
                 _currentUserAccessor = currentUserAccessor;
             }
 
-            public async Task<TransactionEnvelope> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<TransactionsEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
-                var invoiceId = Guid.NewGuid().ToByteArray();
-
-                var customer = await _context.Customer
-                    .FirstOrDefaultAsync(c => request.CustomerId.Equals((new Guid(c.Id)).ToString()));
-                if (customer == null)
+                var productToSell = await _context.Product.FromSqlRaw($"SELECT TYPE FROM PRODUCT WHERE ID = {request.TransactionData.ProductId}").FirstOrDefaultAsync();
+                List<ExportUnit> exportUnits = new List<ExportUnit>();
+                if (productToSell != null)
                 {
-                    request.Detail = "Không xuất hóa đơn cho khách hàng";
-                }
-
-                var invoice = new Invoice()
-                {
-                    Id = invoiceId,
-                    ExportDate = DateTime.Now,
-                    Detail = request.Detail,
-                    CustomerId = customer == null ? customer.Id : null,
-                };
-
-                await _context.Invoice.AddAsync(invoice);
-                await _context.SaveChangesAsync();
-
-                // Create each line in a transaction (invoice)
-                List<InvoiceLine> lines = new List<InvoiceLine>();
-                foreach (var part in request.TransactionParts)
-                {
-                    var productLine = await _context.Product
-                        .FirstOrDefaultAsync(p => part.ProductId.Equals((new Guid(p.Id)).ToString()), cancellationToken);
-                    lines.Add(new InvoiceLine()
+                    // Get latest price fluctuation from a Product
+                    var productPrice = await _context.PriceFluctuation
+                        .FromSqlRaw($"SELECT ID, CHANGED_PRICE FROM PRICE_FLUCTUATION WHERE PRODUCT_ID = {request.TransactionData.ProductId} ORDER BY DATE DESC")
+                        .FirstOrDefaultAsync();
+                    // Warranty Code only have effect when product type is TIRE
+                    if (productToSell.Type.Equals(ProductTypes.TIRE))
                     {
-                        Id = Guid.NewGuid().ToByteArray(),
-                        Quantity = part.Quantity,
-                        Total = part.Quantity * productLine.Price,
-                        Description = part.Description,
-                        InvoiceId = invoiceId
-                    });
-                   
+                        for (int i = 0; i < request.TransactionData.Quantity; i++)
+                        {
+                            // Export price will be update when export invoice
+                            exportUnits.Add(new ExportUnit
+                            {
+                                Id = Guid.NewGuid().ToByteArray(),
+                                WarrantyCode = (new Random()).Next(10000000, 99999999).ToString(),
+                                Type = ProductTypes.TIRE,
+                                Billing = false,
+                                Quantity = 1,
+                                ExportPrice = productPrice.ChangedPrice,
+                                ExportDatetime = DateTime.Now,
+                                PriceFluctuationId = productPrice.Id
+                            });
+                        }
+                    }
+                    else // If the type is different than TIRE => insert with multiple quantity without warranty code
+                    {
+                        exportUnits.Add(new ExportUnit
+                        {
+                            Id = Guid.NewGuid().ToByteArray(),
+                            WarrantyCode = string.Empty,
+                            Type = productToSell.Type,
+                            Billing = false,
+                            Quantity = request.TransactionData.Quantity,
+                            ExportDatetime = DateTime.Now,
+                            ExportPrice = productPrice.ChangedPrice,
+                            PriceFluctuationId = productPrice.Id
+                        });
+                    }
                 }
-                invoice.InvoiceLine = lines;
-                await _context.InvoiceLine.AddRangeAsync(lines);
+                else throw new Exception();
+
+                await _context.ExportUnit.AddRangeAsync(exportUnits);
                 await _context.SaveChangesAsync();
 
-                return new TransactionEnvelope(invoice);
+                return new TransactionsEnvelope(exportUnits);
             }
         }
 

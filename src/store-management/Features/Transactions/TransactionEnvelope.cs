@@ -7,14 +7,23 @@ using System.Threading.Tasks;
 
 namespace store_management.Features.Transactions
 {
+    public class TransactionsEnvelope
+    {
+        public TransactionsEnvelope(List<ExportUnit> exportUnits) 
+        {
+            ExportUnits = exportUnits;
+        }
+        public List<ExportUnit> ExportUnits { get; set; }
+
+    }
+
     public class TransactionEnvelope
     {
-        public TransactionEnvelope(Invoice invoice) 
+        public TransactionEnvelope(ExportUnit exportUnit)
         {
-            Invoice = invoice;
+            ExportUnit = exportUnit;
         }
-        public Invoice Invoice { get; }
-
+        public ExportUnit ExportUnit { get; set; }
     }
 
     public enum InvoiceTypes
