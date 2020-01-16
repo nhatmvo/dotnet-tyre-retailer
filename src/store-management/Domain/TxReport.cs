@@ -12,6 +12,7 @@ namespace store_management.Domain
         public DateTime? UpdateTime { get; set; }
         public string Action { get; set; }
         public int? QuantityUpdate { get; set; }
+        public decimal? PriceUpdate { get; set; }
 
         public virtual Account Account { get; set; }
         public virtual Product Product { get; set; }

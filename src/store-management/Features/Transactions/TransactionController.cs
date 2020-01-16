@@ -18,5 +18,25 @@ namespace store_management.Features.Transactions
         {
             _mediator = mediator;
         }
+
+        [HttpGet]
+        public async Task<TransactionEnvelope> Get(string id)
+        {
+            return await _mediator.Send(new Details.Query(id));
+        }
+
+        [HttpPost]
+        public async Task<TransactionsEnvelope> Create(Create.Command command)
+        {
+            return await _mediator.Send(command);
+        }
+
+        [HttpGet]
+        public async Task<TransactionsEnvelope> List()
+        {
+            // chưa update vào
+            return new TransactionsEnvelope(new List<Domain.ExportUnit>());
+        }
+
     }
 }

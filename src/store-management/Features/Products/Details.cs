@@ -46,12 +46,14 @@ namespace store_management.Features.Products
 
             public async Task<ProductEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
+
                 var product = await _context.Product.FirstOrDefaultAsync(p => (new Guid(p.Id)).ToString() == request.Id, cancellationToken);
 
                 if (product == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
 
                 return new ProductEnvelope(product);
+                
             }
         }
 

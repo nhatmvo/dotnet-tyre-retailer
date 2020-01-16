@@ -17,6 +17,10 @@ namespace store_management.Features.Transactions
     {
         public class Query : IRequest<TransactionEnvelope>
         {
+            public Query (string id)
+            {
+                Id = id;
+            }
             public string Id { get; set; }
         }
 
@@ -41,10 +45,13 @@ namespace store_management.Features.Transactions
 
             public async Task<TransactionEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
-                var invoice = await _context.Invoice.FirstOrDefaultAsync(i => request.Id.Equals((new Guid(i.Id)).ToString()));
-                if (invoice == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Invoice = Constants.NOT_FOUND });
-                return new TransactionEnvelope(invoice);
+                var exportUnit = await _context.ExportUnit.FromSqlRaw($"SELECT * FROM EXPORT_UNIT WHERE ID = {(new Guid(request.Id)).ToByteArray()}").FirstOrDefaultAsync();
+                if (exportUnit != null)
+                {
+                    return new TransactionEnvelope(exportUnit);
+                }
+                else throw new RestException(HttpStatusCode.NotFound, new { });
+                
             }
         }
 

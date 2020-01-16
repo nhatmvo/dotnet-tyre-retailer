@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="scaffold.bat" />
+    <None Remove="store-managemenet-erd.mwb" />
+    <None Remove="store-management.db" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Domain\" />
-    <Folder Include="Features\Users\" />
-    <Folder Include="Infrastructure\Security\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +22,7 @@
     <PackageReference Include="FluentValidation" Version="8.6.0" />
     <PackageReference Include="MediatR" Version="8.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -7,7 +7,6 @@ namespace store_management.Domain
     {
         public Product()
         {
-            InvoiceLine = new HashSet<InvoiceLine>();
             TxReport = new HashSet<TxReport>();
         }
 
@@ -19,14 +18,13 @@ namespace store_management.Domain
         public string Pattern { get; set; }
         public string ImagePath { get; set; }
         public decimal Price { get; set; }
-        public int Quality { get; set; }
+        public int QuantityRemain { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
         public byte[] CreatedBy { get; set; }
         public DateTime? ModifyDate { get; set; }
         public byte[] ModifyBy { get; set; }
 
-        public virtual ICollection<InvoiceLine> InvoiceLine { get; set; }
         public virtual ICollection<TxReport> TxReport { get; set; }
     }
 }
