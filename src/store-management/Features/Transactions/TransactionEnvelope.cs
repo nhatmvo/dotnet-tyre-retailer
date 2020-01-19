@@ -9,26 +9,32 @@ namespace store_management.Features.Transactions
 {
     public class TransactionsEnvelope
     {
-        public TransactionsEnvelope(List<ExportUnit> exportUnits) 
+        public TransactionsEnvelope(List<SoldUnit> soldUnits) 
         {
-            ExportUnits = exportUnits;
+            SoldUnits = soldUnits;
         }
-        public List<ExportUnit> ExportUnits { get; set; }
+        public List<SoldUnit> SoldUnits { get; set; }
 
     }
 
     public class TransactionEnvelope
     {
-        public TransactionEnvelope(ExportUnit exportUnit)
+        public TransactionEnvelope(SoldUnit soldUnit)
         {
-            ExportUnit = exportUnit;
+            SoldUnit = soldUnit;
         }
-        public ExportUnit ExportUnit { get; set; }
+        public SoldUnit SoldUnit { get; set; }
     }
 
-    public enum InvoiceTypes
+    public class TransactionFilter
     {
-        BILLED = 1,
-        NON_BILLED = 2
+
+        public bool? IsBilling { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public string Type { get; set; }
+        public int? Limit { get; set; }
+        public int? Offset { get; set; }
     }
+
 }

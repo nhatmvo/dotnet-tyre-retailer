@@ -19,8 +19,10 @@ namespace store_management.Features.Customers
             public Query(string id)
             {
                 Id = id;
+                
             }
             public string Id { get; set; }
+
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -43,7 +45,7 @@ namespace store_management.Features.Customers
             public async Task<CustomerEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var customer = await _context.Customer
-                    .FirstOrDefaultAsync(c => (new Guid(c.Id)).ToString().Equals(request.Id), cancellationToken);
+                    .FirstOrDefaultAsync(c => c.Id.Equals(request.Id), cancellationToken);
                 
                 if (customer == null)
                 {

@@ -12,7 +12,7 @@ namespace store_management.Features.Products
         {
             Product = product;
         }
-
         public Product Product { get; }
     }
+
 }

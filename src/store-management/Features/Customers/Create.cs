@@ -58,7 +58,7 @@ namespace store_management.Features.Customers
             {
                 var customer = new Customer()
                 {
-                    Id = Guid.NewGuid().ToByteArray(),
+                    Id = Guid.NewGuid().ToString(),
                     Address = command.Customer.Address,
                     TaxCode = command.Customer.TaxNumber,
                     BankAccountNumber = command.Customer.BankAccount,

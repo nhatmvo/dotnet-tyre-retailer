@@ -7,10 +7,11 @@ namespace store_management.Domain
     {
         public Product()
         {
-            TxReport = new HashSet<TxReport>();
+            IeReport = new HashSet<IeReport>();
+            PriceFluctuation = new HashSet<PriceFluctuation>();
         }
 
-        public byte[] Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
         public string Size { get; set; }
@@ -21,10 +22,11 @@ namespace store_management.Domain
         public int QuantityRemain { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public byte[] CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public DateTime? ModifyDate { get; set; }
-        public byte[] ModifyBy { get; set; }
+        public string ModifyBy { get; set; }
 
-        public virtual ICollection<TxReport> TxReport { get; set; }
+        public virtual ICollection<IeReport> IeReport { get; set; }
+        public virtual ICollection<PriceFluctuation> PriceFluctuation { get; set; }
     }
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace store_management.Domain
 {
-    public partial class TxReport
+    public partial class IeReport
     {
-        public byte[] Id { get; set; }
-        public byte[] AccountId { get; set; }
-        public byte[] ProductId { get; set; }
+        public string Id { get; set; }
+        public string AccountId { get; set; }
+        public string ProductId { get; set; }
         public DateTime? CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public string Action { get; set; }

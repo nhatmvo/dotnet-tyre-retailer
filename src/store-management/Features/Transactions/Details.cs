@@ -45,7 +45,8 @@ namespace store_management.Features.Transactions
 
             public async Task<TransactionEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
-                var exportUnit = await _context.ExportUnit.FromSqlRaw($"SELECT * FROM EXPORT_UNIT WHERE ID = {(new Guid(request.Id)).ToByteArray()}").FirstOrDefaultAsync();
+                //var exportUnit = await _context.ExportUnit.FromSqlRaw($"SELECT * FROM EXPORT_UNIT WHERE ID = {(new Guid(request.Id)).ToByteArray()}").FirstOrDefaultAsync();
+                var exportUnit = await _context.SoldUnit.Where(eu => eu.Id.Equals(request.Id)).FirstOrDefaultAsync();
                 if (exportUnit != null)
                 {
                     return new TransactionEnvelope(exportUnit);

@@ -46,7 +46,7 @@ namespace store_management.Features.Products
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var product = await _context.Product
-                    .FirstOrDefaultAsync(p => (new Guid(p.Id)).ToString() == request.ToString(), cancellationToken);
+                    .FirstOrDefaultAsync(p => p.Id.Equals(request.ToString()) , cancellationToken);
                 if (product == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
 

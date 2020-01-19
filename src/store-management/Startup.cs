@@ -15,14 +15,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using store_management.Domain;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Security;
 
 namespace store_management
 {
     public class Startup
     {
-        public const string DEFAULT_CONNECTION_STRING = "Server=localhost;Port=32769;Database=TIRE_STORE_ALTER;User=root;Password=nhat1997;";
+        public const string DEFAULT_CONNECTION_STRING = "Server=localhost;Port=32769;Database=TIRE_MANAGEMENT_SYS;User=root;Password=nhat1997;";
         public const string DEFAULT_DATABASE_PROVIDER = "mysql";
 
         public IConfiguration Configuration { get; }
@@ -56,7 +58,14 @@ namespace store_management
             });
 
             services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+            services.AddTransient<IPasswordHasher, PasswordHasher>();
+            services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddCors();
+            services.AddMvc(option => option.EnableEndpointRouting = false)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
             //services.AddJwt();
         }
@@ -81,6 +90,13 @@ namespace store_management
             app.UseRouting();
             
             app.UseAuthorization();
+
+            app.UseCors(builder =>
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+            app.UseHttpsRedirection();
 
             app.UseEndpoints(endpoints =>
             {

@@ -32,9 +32,8 @@ namespace store_management.Features.Products
         }
 
         [HttpPut]
-        public async Task<ProductEnvelope> Edit(string id, [FromBody] Edit.Command command)
+        public async Task<ProductEnvelope> Edit([FromBody] Edit.Command command)
         {
-            command.Id = id;
             return await _mediator.Send(command);
         }
 
@@ -44,5 +43,10 @@ namespace store_management.Features.Products
             await _mediator.Send(new Delete.Command(id));
         }
 
+        [HttpGet("List")]
+        public async Task<ProductsEnvelope> List([FromQuery] List.Query query)
+        {
+            return await _mediator.Send(query);
+        }
     }
 }

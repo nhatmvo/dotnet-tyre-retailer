@@ -39,6 +39,7 @@ namespace store_management.Features.Products
                 RuleFor(x => x.Brand).NotEmpty().NotNull();
                 RuleFor(x => x.Pattern).NotEmpty().NotNull();
                 RuleFor(x => x.Price).NotEmpty().NotNull().GreaterThan(0);
+                RuleFor(x => x.ImportPrice).NotEmpty().NotNull().GreaterThan(0);
                 RuleFor(x => x.Quantity).NotEmpty().NotNull().GreaterThan(0);
             }
         }
@@ -70,10 +71,12 @@ namespace store_management.Features.Products
 
             public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
-                var product = await _context.Product.FirstOrDefaultAsync(p => p.Name == request.ProductData.Name);
-                if (product != null)
-                    throw new RestException(HttpStatusCode.BadRequest, new { Product = Constants.EXISTED });
-                var productId = Guid.NewGuid().ToByteArray();
+                var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(request.ProductData.Name)
+                    && p.Brand.Equals(request.ProductData.Brand) && p.Size.Equals(request.ProductData.Size)
+                    && p.Pattern.Equals(request.ProductData.Pattern));
+                //if (product != null)
+                //    throw new RestException(HttpStatusCode.BadRequest, new { Product = Constants.EXISTED });
+                var productId = Guid.NewGuid().ToString();
                 var productToCreate = new Product()
                 {
                     Id = productId,
@@ -88,10 +91,10 @@ namespace store_management.Features.Products
                     // Add created person
                 };
                 // Add product
-                await _context.Product.AddAsync(product);
+                await _context.Product.AddAsync(productToCreate);
                 // Then create price table ()
                 var priceFluctuation = new PriceFluctuation {
-                    Id = Guid.NewGuid().ToByteArray(),
+                    Id = Guid.NewGuid().ToString(),
                     ChangedImportPrice = request.ProductData.ImportPrice,
                     ChangedPrice = request.ProductData.Price,
                     Date = DateTime.Now,
@@ -101,7 +104,7 @@ namespace store_management.Features.Products
 
                 await _context.SaveChangesAsync();
                 
-                return new ProductEnvelope(product);
+                return new ProductEnvelope(productToCreate);
             }
         }
     }

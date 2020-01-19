@@ -74,7 +74,7 @@ namespace store_management.Features.Accounts
 
                 _context.Account.Add(account);
                 await _context.SaveChangesAsync(cancellationToken);
-                account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
+                //account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
                 return new AccountEnvelope(account);
 
             }

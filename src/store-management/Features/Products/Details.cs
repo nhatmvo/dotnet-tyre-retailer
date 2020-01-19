@@ -16,6 +16,14 @@ namespace store_management.Features.Products
     public class Details
     {
 
+        public class ProductData
+        {
+            public string Pattern { get; set; }
+            public string Type { get; set; }
+            public string Brand { get; set; }
+            public string Size { get; set; }
+        }
+
         public class Query : IRequest<ProductEnvelope>
         {
             public Query(string id)
@@ -23,6 +31,7 @@ namespace store_management.Features.Products
                 Id = id;
             }
             public string Id { get; set; }
+            public ProductData ProductData { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -47,7 +56,9 @@ namespace store_management.Features.Products
             public async Task<ProductEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
 
-                var product = await _context.Product.FirstOrDefaultAsync(p => (new Guid(p.Id)).ToString() == request.Id, cancellationToken);
+                var product = await _context.Product
+                    .Include(p => p.PriceFluctuation)
+                    .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
 
                 if (product == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });

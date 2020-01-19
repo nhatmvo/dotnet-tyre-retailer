@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Net;
 using store_management.Infrastructure;
 using store_management.Infrastructure.Common;
+using System.Text.Json.Serialization;
 
 namespace store_management.Features.Products
 {
@@ -33,6 +34,7 @@ namespace store_management.Features.Products
         public class Command : IRequest<ProductEnvelope>
         {
             public ProductData ProductData { get; set; }
+            [JsonIgnore]
             public string Id { get; set; }
         }
 
@@ -59,23 +61,22 @@ namespace store_management.Features.Products
             public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
                 var productToUpdate = await _context.Product
-                    .FirstOrDefaultAsync(p => (new Guid(p.Id)).ToString() == request.Id);
+                    .FirstOrDefaultAsync(p => p.Id.Equals(request.Id));
                 if (productToUpdate == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
 
                 if (request.ProductData.Price != 0 || request.ProductData.ImportPrice != 0)
                 {
-                    var pHistory  = _context.PriceFluctuation.FromSqlRaw($"SELECT IMPORT_PRICE FROM PRICE_FLUCTUATION " +
-                        $"WHERE PRODUCT_ID = '{request.Id}' ORDER BY DATE DESC").FirstOrDefault();
+                    var pHistory = await _context.PriceFluctuation.Where(p => p.ProductId.Equals(request.Id)).OrderByDescending(pf => pf.Date).FirstOrDefaultAsync();
                     var priceFluctuation = new PriceFluctuation
                     {
-                        Id = Guid.NewGuid().ToByteArray(),
+                        Id = Guid.NewGuid().ToString(),
                         ChangedImportPrice = request.ProductData.ImportPrice != 0 ? request.ProductData.ImportPrice : pHistory.ChangedImportPrice,
                         CurrentImportPrice = pHistory.ChangedImportPrice,
                         ChangedPrice = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price,
                         CurrentPrice = pHistory.ChangedPrice,
                         Date = DateTime.Now,
-                        ProductId = (new Guid(request.Id)).ToByteArray()
+                        ProductId = request.Id
                         
                     };
                     await _context.PriceFluctuation.AddAsync(priceFluctuation);
@@ -90,22 +91,13 @@ namespace store_management.Features.Products
                 productToUpdate.Pattern = request.ProductData.Pattern ?? productToUpdate.Pattern;
                 productToUpdate.ImagePath = request.ProductData.ImagePath ?? productToUpdate.ImagePath;
                 productToUpdate.Price = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price;
-                productToUpdate.QuantityRemain = request.ProductData.Quantity != 0 ? request.ProductData.Quantity : productToUpdate.QuantityRemain;
+                productToUpdate.QuantityRemain = productToUpdate.QuantityRemain + request.ProductData.Quantity;
                 productToUpdate.Description = request.ProductData.Description ?? productToUpdate.Description;
 
                 // Update last modify by and last modify date
                 productToUpdate.ModifyDate = DateTime.Now;
 
                 _context.Product.Update(productToUpdate);
-
-                //var reportHistory = new TxReport
-                //{
-                //    Id = Guid.NewGuid().ToByteArray(),
-                //    Action = ActionConstants.EDIT_PRODUCT,
-                //    CreateTime = DateTime.Now,
-                //    ProductId = new Guid(request.Id).ToByteArray(),
-                //    QuantityUpdate = request.ProductData.Quantity
-                //};
 
                 await _context.SaveChangesAsync();
 

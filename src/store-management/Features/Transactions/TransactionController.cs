@@ -31,11 +31,10 @@ namespace store_management.Features.Transactions
             return await _mediator.Send(command);
         }
 
-        [HttpGet]
-        public async Task<TransactionsEnvelope> List()
+        [HttpGet("List")]
+        public async Task<TransactionsEnvelope> List(List.Query query)
         {
-            // chưa update vào
-            return new TransactionsEnvelope(new List<Domain.ExportUnit>());
+            return await _mediator.Send(query);
         }
 
     }

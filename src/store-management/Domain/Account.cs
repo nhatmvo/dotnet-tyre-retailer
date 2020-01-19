@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -8,20 +7,20 @@ namespace store_management.Domain
     {
         public Account()
         {
+            IeReport = new HashSet<IeReport>();
             Invoice = new HashSet<Invoice>();
             OperationHistory = new HashSet<OperationHistory>();
-            TxReport = new HashSet<TxReport>();
+            SoldUnit = new HashSet<SoldUnit>();
         }
 
-        public byte[] Id { get; set; }
+        public string Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string Salt { get; set; }
 
-        [NotMapped]
-        public string Token { get; set; }
+        public virtual ICollection<IeReport> IeReport { get; set; }
         public virtual ICollection<Invoice> Invoice { get; set; }
         public virtual ICollection<OperationHistory> OperationHistory { get; set; }
-        public virtual ICollection<TxReport> TxReport { get; set; }
+        public virtual ICollection<SoldUnit> SoldUnit { get; set; }
     }
 }

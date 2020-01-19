@@ -14,6 +14,11 @@ namespace store_management.Features.Products
     {
         public class Query : IRequest<ProductsEnvelope>
         {
+            public Query()
+            {
+
+            }
+
             public Query(ProductsFilter filter)
             {
                 Filter = filter;
@@ -37,28 +42,30 @@ namespace store_management.Features.Products
             public async Task<ProductsEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 IQueryable<Product> queryable = _context.Product.GetAllData();
+                if (request.Filter == null) {
+                    var result = await queryable.ToListAsync();
+                    return new ProductsEnvelope {
+                        Products = result,
+                        ProductsCount = result.Count()
+                    };
+                } 
 
-                if (string.IsNullOrEmpty(request.Filter.Pattern))
+                if (!string.IsNullOrEmpty(request.Filter.Pattern))
                 {
                     queryable = queryable.Where(q => q.Pattern.Contains(request.Filter.Pattern));
                 }
 
-                if (string.IsNullOrEmpty(request.Filter.Branch))
+                if (!string.IsNullOrEmpty(request.Filter.Branch))
                 {
                     queryable = queryable.Where(q => q.Brand.Contains(request.Filter.Branch));
                 }
 
-                if (string.IsNullOrEmpty(request.Filter.Type))
+                if (!string.IsNullOrEmpty(request.Filter.Type))
                 {
                     queryable = queryable.Where(q => q.Type.Equals(request.Filter.Type));
                 }
 
-                if (!request.Filter.Newest)
-                {
-                    queryable.OrderByDescending(x => x.CreatedDate);
-                }
                 
-
                 var products = await queryable
                     .Skip(request.Filter.Offset ?? 0)
                     .Take(request.Filter.Limit ?? 10)

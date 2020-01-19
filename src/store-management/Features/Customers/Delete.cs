@@ -45,7 +45,7 @@ namespace store_management.Features.Customers
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var customer = await _context.Customer
-                    .FirstOrDefaultAsync(c => (new Guid(c.Id)).ToString().Equals(request.Id), cancellationToken);
+                    .FirstOrDefaultAsync(c => c.Id.ToString().Equals(request.Id), cancellationToken);
 
                 if (customer == null)
                 {

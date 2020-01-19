@@ -10,7 +10,7 @@ namespace store_management.Domain
             Invoice = new HashSet<Invoice>();
         }
 
-        public byte[] Id { get; set; }
+        public string Id { get; set; }
         public string FullName { get; set; }
         public string Address { get; set; }
         public string BankAccountNumber { get; set; }
