@@ -99,6 +99,20 @@ namespace store_management.Features.Products
 
                 _context.Product.Update(productToUpdate);
 
+                if (request.ProductData.Quantity != 0)
+                {
+                    var ieReport = new IeReport
+                    {
+                        Action = ActionConstants.EDIT_PRODUCT,
+                        ProductId = request.Id,
+                        CreateTime = DateTime.Now,
+                        QuantityUpdate = 1 * request.ProductData.Quantity,
+                        PriceUpdate = -1 * request.ProductData.Quantity * request.ProductData.ImportPrice
+                    };
+                    await _context.IeReport.AddAsync(ieReport);
+                }
+               
+
                 await _context.SaveChangesAsync();
 
                 return new ProductEnvelope(productToUpdate);

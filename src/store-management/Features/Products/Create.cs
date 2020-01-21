@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
@@ -101,6 +102,17 @@ namespace store_management.Features.Products
                     ProductId = productId
                 };
                 await _context.PriceFluctuation.AddAsync(priceFluctuation);
+
+                // Update value into IE Report
+                var ieReport = new IeReport
+                {
+                    Action = ActionConstants.CREATE_PRODUCT,
+                    ProductId = productId,
+                    CreateTime = DateTime.Now,
+                    QuantityUpdate = 1 * request.ProductData.Quantity,
+                    PriceUpdate = -1 * request.ProductData.Quantity * request.ProductData.ImportPrice
+                };
+                await _context.IeReport.AddAsync(ieReport);
 
                 await _context.SaveChangesAsync();
                 

@@ -26,9 +26,10 @@ namespace store_management.Features.Products
 
         public class Query : IRequest<ProductEnvelope>
         {
-            public Query(string id)
+            public Query(string id, ProductData productData = null)
             {
                 Id = id;
+                ProductData = productData;
             }
             public string Id { get; set; }
             public ProductData ProductData { get; set; }
@@ -38,7 +39,8 @@ namespace store_management.Features.Products
         {
             public QueryValidator()
             {
-                RuleFor(x => x.Id).NotEmpty().NotNull();
+                RuleFor(x => x.Id).NotNull().NotEmpty().Unless(x => x.ProductData == null);
+                RuleFor(x => x.ProductData).NotNull().Unless(x => string.IsNullOrEmpty(x.Id));
             }
         }
 
@@ -55,15 +57,36 @@ namespace store_management.Features.Products
 
             public async Task<ProductEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
+                var product = new Product();
+                var validationResult = (new QueryValidator()).Validate(request);
+                
+                if (validationResult.IsValid)
+                {
+                    if (!string.IsNullOrEmpty(request.Id))
+                    {
+                        product = await _context.Product
+                            .Include(p => p.PriceFluctuation)
+                            .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
+                        if (product == null)
+                            throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
+                    }
+                    else if (request.ProductData != null)
+                    {
+                        product = await _context.Product
+                            .FirstOrDefaultAsync(p => p.Brand.Equals(request.ProductData.Brand)
+                            && p.Pattern.Equals(request.ProductData.Pattern)
+                            && p.Size.Equals(request.ProductData.Size)
+                            && p.Type.Equals(request.ProductData.Type));
+                        if (product == null)
+                            throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
+                    }
 
-                var product = await _context.Product
-                    .Include(p => p.PriceFluctuation)
-                    .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
-
-                if (product == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
-
-                return new ProductEnvelope(product);
+                    return new ProductEnvelope(product);
+                } else
+                {
+                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                }
+                
                 
             }
         }
