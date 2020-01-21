@@ -14,4 +14,13 @@ namespace store_management.Features.Invoices
         }
         public Invoice Invoice { get; set; }
     }
+
+    public class InvoicesEnvelope
+    {
+        public InvoicesEnvelope(List<Invoice> invoices)
+        {
+            Invoices = invoices;
+        }
+        public List<Invoice> Invoices { get; set; }
+    }
 }

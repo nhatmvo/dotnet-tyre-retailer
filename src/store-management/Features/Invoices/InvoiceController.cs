@@ -18,5 +18,12 @@ namespace store_management.Features.Invoices
         {
             _mediator = mediator;
         }
+
+        [HttpGet]
+        public async Task<InvoiceEnvelope> Create(Create.Command command)
+        {
+            // Features\Invoices\Create.cs
+            return await _mediator.Send(command);
+        }
     }
 }
