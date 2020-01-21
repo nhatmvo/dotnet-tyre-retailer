@@ -112,6 +112,16 @@ namespace store_management.Features.Transactions
                     else throw new Exception();
                     await _context.SoldUnit.AddRangeAsync(soldUnits);
                 }
+
+                var ieReport = new IeReport
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UpdateTime = DateTime.Now,
+                    QuantityUpdate = request.TransactionData.Sum(a => a.Quantity),
+                    PriceUpdate = request.TransactionData.Sum(a => a.SalePrice)
+                };
+
+                await _context.IeReport.AddAsync(ieReport);
                 
                 await _context.SaveChangesAsync();
 
