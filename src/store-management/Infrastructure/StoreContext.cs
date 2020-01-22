@@ -17,13 +17,14 @@ namespace store_management.Domain
 
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<Customer> Customer { get; set; }
-        public virtual DbSet<IeReport> IeReport { get; set; }
+        public virtual DbSet<ImportUnit> ImportUnit { get; set; }
         public virtual DbSet<Invoice> Invoice { get; set; }
         public virtual DbSet<InvoiceLine> InvoiceLine { get; set; }
         public virtual DbSet<OperationHistory> OperationHistory { get; set; }
         public virtual DbSet<PriceFluctuation> PriceFluctuation { get; set; }
         public virtual DbSet<Product> Product { get; set; }
-        public virtual DbSet<SoldUnit> SoldUnit { get; set; }
+        public virtual DbSet<SaleUnit> SaleUnit { get; set; }
+        public virtual DbSet<Transaction> Transaction { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -100,15 +101,15 @@ namespace store_management.Domain
                     .HasCollation("utf8mb4_0900_ai_ci");
             });
 
-            modelBuilder.Entity<IeReport>(entity =>
+            modelBuilder.Entity<ImportUnit>(entity =>
             {
-                entity.ToTable("IE_REPORT");
-
-                entity.HasIndex(e => e.AccountId)
-                    .HasName("FK_IE_HISTORY_ACCOUNT");
+                entity.ToTable("IMPORT_UNIT");
 
                 entity.HasIndex(e => e.ProductId)
-                    .HasName("FK_IE_HISTORY_PRODUCT");
+                    .HasName("FK_IMPORT_UNIT_PRODUCT");
+
+                entity.HasIndex(e => e.TransactionId)
+                    .HasName("FK_IMPORT_UNIT_TRANSACTION");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
@@ -116,21 +117,9 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.AccountId)
-                    .HasColumnName("ACCOUNT_ID")
-                    .HasColumnType("varchar(50)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
-
-                entity.Property(e => e.Action)
-                    .HasColumnName("ACTION")
-                    .HasColumnType("varchar(20)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
-
-                entity.Property(e => e.CreateTime)
-                    .HasColumnName("CREATE_TIME")
-                    .HasColumnType("datetime");
+                entity.Property(e => e.ImportPrice)
+                    .HasColumnName("IMPORT_PRICE")
+                    .HasColumnType("decimal(13,4)");
 
                 entity.Property(e => e.ProductId)
                     .HasColumnName("PRODUCT_ID")
@@ -138,23 +127,25 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.TotalPrice)
-                    .HasColumnName("TOTAL_PRICE")
-                    .HasColumnType("decimal(13,4)");
-
-                entity.Property(e => e.TotalQuantity)
-                    .HasColumnName("TOTAL_QUANTITY")
+                entity.Property(e => e.Quantity)
+                    .HasColumnName("QUANTITY")
                     .HasColumnType("int(11)");
 
-                entity.HasOne(d => d.Account)
-                    .WithMany(p => p.IeReport)
-                    .HasForeignKey(d => d.AccountId)
-                    .HasConstraintName("FK_IE_HISTORY_ACCOUNT");
+                entity.Property(e => e.TransactionId)
+                    .HasColumnName("TRANSACTION_ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.HasOne(d => d.Product)
-                    .WithMany(p => p.IeReport)
+                    .WithMany(p => p.ImportUnit)
                     .HasForeignKey(d => d.ProductId)
-                    .HasConstraintName("FK_IE_HISTORY_PRODUCT");
+                    .HasConstraintName("FK_IMPORT_UNIT_PRODUCT");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.ImportUnit)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_IMPORT_UNIT_TRANSACTION");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -224,12 +215,6 @@ namespace store_management.Domain
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
                     .HasColumnType("varchar(50)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
-
-                entity.Property(e => e.Description)
-                    .HasColumnName("DESCRIPTION")
-                    .HasColumnType("varchar(256)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
@@ -405,10 +390,6 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Price)
-                    .HasColumnName("PRICE")
-                    .HasColumnType("decimal(13,4)");
-
                 entity.Property(e => e.QuantityRemain)
                     .HasColumnName("QUANTITY_REMAIN")
                     .HasColumnType("int(11)");
@@ -426,18 +407,15 @@ namespace store_management.Domain
                     .HasCollation("utf8mb4_0900_ai_ci");
             });
 
-            modelBuilder.Entity<SoldUnit>(entity =>
+            modelBuilder.Entity<SaleUnit>(entity =>
             {
-                entity.ToTable("SOLD_UNIT");
-
-                entity.HasIndex(e => e.AccountId)
-                    .HasName("FK_EXPORT_UNIT_ACCOUNT");
-
-                entity.HasIndex(e => e.InvoiceLineId)
-                    .HasName("FK_EXPORT_UNIT_INVOICE_LINE");
+                entity.ToTable("SALE_UNIT");
 
                 entity.HasIndex(e => e.PriceFluctuationId)
-                    .HasName("FK_EXPORT_UNIT_PRICE_FLUCTUATION");
+                    .HasName("FK_SALE_UNIT_PRICE_FLUCTUATION");
+
+                entity.HasIndex(e => e.TransactionId)
+                    .HasName("FK_SALE_UNIT_TRANSACTION");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
@@ -445,23 +423,7 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.AccountId)
-                    .HasColumnName("ACCOUNT_ID")
-                    .HasColumnType("varchar(50)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
-
                 entity.Property(e => e.Billing).HasColumnName("BILLING");
-
-                entity.Property(e => e.Datetime)
-                    .HasColumnName("DATETIME")
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.InvoiceLineId)
-                    .HasColumnName("INVOICE_LINE_ID")
-                    .HasColumnType("varchar(50)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.Property(e => e.PriceFluctuationId)
                     .HasColumnName("PRICE_FLUCTUATION_ID")
@@ -481,6 +443,12 @@ namespace store_management.Domain
                     .HasColumnName("SALE_PRICE")
                     .HasColumnType("decimal(13,4)");
 
+                entity.Property(e => e.TransactionId)
+                    .HasColumnName("TRANSACTION_ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
                 entity.Property(e => e.Type)
                     .HasColumnName("TYPE")
                     .HasColumnType("varchar(50)")
@@ -493,20 +461,52 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.HasOne(d => d.Account)
-                    .WithMany(p => p.SoldUnit)
-                    .HasForeignKey(d => d.AccountId)
-                    .HasConstraintName("FK_EXPORT_UNIT_ACCOUNT");
-
-                entity.HasOne(d => d.InvoiceLine)
-                    .WithMany(p => p.SoldUnit)
-                    .HasForeignKey(d => d.InvoiceLineId)
-                    .HasConstraintName("FK_EXPORT_UNIT_INVOICE_LINE");
-
                 entity.HasOne(d => d.PriceFluctuation)
-                    .WithMany(p => p.SoldUnit)
+                    .WithMany(p => p.SaleUnit)
                     .HasForeignKey(d => d.PriceFluctuationId)
-                    .HasConstraintName("FK_EXPORT_UNIT_PRICE_FLUCTUATION");
+                    .HasConstraintName("FK_SALE_UNIT_PRICE_FLUCTUATION");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.SaleUnit)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_SALE_UNIT_TRANSACTION");
+            });
+
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.ToTable("TRANSACTION");
+
+                entity.HasIndex(e => e.AccountId)
+                    .HasName("FK_TRANSACTION_ACCOUNT");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.AccountId)
+                    .HasColumnName("ACCOUNT_ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.Billing).HasColumnName("BILLING");
+
+                entity.Property(e => e.Date)
+                    .HasColumnName("DATE")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("TYPE")
+                    .HasColumnType("varchar(1)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.Transaction)
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK_TRANSACTION_ACCOUNT");
             });
 
             OnModelCreatingPartial(modelBuilder);

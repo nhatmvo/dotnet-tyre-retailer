@@ -2,7 +2,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
-using store_management.Features.Importation;
+using store_management.Features.Imports;
+using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace store_management.Features.Importations
+namespace store_management.Features.Imports
 {
     public class Create
     {
@@ -42,7 +43,7 @@ namespace store_management.Features.Importations
             }
         }
 
-        public class Command : IRequest<ImportsEnvelope>
+        public class Command : IRequest<ImportEnvelope>
         {
             public List<ImportData> ImportsData { get; set; }
         }
@@ -55,7 +56,7 @@ namespace store_management.Features.Importations
             }
         }
 
-        public class Handler : IRequestHandler<Command, ImportsEnvelope>
+        public class Handler : IRequestHandler<Command, ImportEnvelope>
         {
 
             private readonly StoreContext _context;
@@ -67,16 +68,28 @@ namespace store_management.Features.Importations
                 _now = DateTime.Now;
             }
 
-            public async Task<ImportsEnvelope> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<ImportEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
                 
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
+                    string transactionId = Guid.NewGuid().ToString();
+
                     var productsInsert = new List<Product>();
                     var productsUpdate = new List<Product>();
+                    var importUnits = new List<ImportUnit>();
                     var priceFluctuationInsert = new List<PriceFluctuation>();
-                    var ieReports = new List<IeReport>();
+
+                    // Create a transaction 
+                    var transaction = new Transaction
+                    {
+                        Id = transactionId,
+                        Type = TransactionType.IMPORT,
+                        Billing = false,
+                        Date = _now
+                    };
+                    await _context.Transaction.AddAsync(transaction);
 
                     foreach (var item in request.ImportsData)
                     {
@@ -85,7 +98,7 @@ namespace store_management.Features.Importations
                         //  2. PriceFluctuation - updated with lastest price of a product
                         //  3. IeReport - using for export & import information when create report
                         var product = await GetProductByProps(item.Pattern, item.Type, item.Brand, item.Size);
-                        string productId = string.Empty;
+                        string productId;
                         if (product == null)
                         {
                             productId = Guid.NewGuid().ToString();
@@ -98,27 +111,29 @@ namespace store_management.Features.Importations
                             productsUpdate.Add(GetUpdateProduct(productId, item, product.QuantityRemain));
                             priceFluctuationInsert.Add(GetProductPriceFlucUpdate(productId, item, product));
                         }
-                        ieReports.Add(new IeReport
+                        var importUnit = new ImportUnit
                         {
                             Id = Guid.NewGuid().ToString(),
-                            CreateTime = _now,
+                            ImportPrice = item.ImportPrice,
                             ProductId = productId,
-                            TotalPrice = item.ImportPrice * item.Quantity,
-                            TotalQuantity = item.Quantity
-                        });
-                        
+                            Quantity = item.Quantity,
+                            TransactionId = transactionId
+                        };
+                        importUnits.Add(importUnit);
+
+
                     }
                     await _context.Product.AddRangeAsync(productsInsert);
                     _context.Product.UpdateRange(productsUpdate);
 
                     await _context.PriceFluctuation.AddRangeAsync(priceFluctuationInsert);
-                    await _context.IeReport.AddRangeAsync(ieReports);
+                    await _context.ImportUnit.AddRangeAsync(importUnits);
 
                     await _context.SaveChangesAsync();
 
-                    return new ImportsEnvelope
+                    return new ImportEnvelope
                     {
-                        Products = productsInsert.Concat(productsUpdate).ToList()
+                        ImportUnits = importUnits
                     };
                 } else
                 {
@@ -134,7 +149,7 @@ namespace store_management.Features.Importations
                     ChangedImportPrice = data.ImportPrice,
                     ChangedPrice = data.Price,
                     CurrentImportPrice = existedProduct.PriceFluctuation.FirstOrDefault().ChangedImportPrice,
-                    CurrentPrice = existedProduct.Price,
+                    CurrentPrice = existedProduct.PriceFluctuation.FirstOrDefault().CurrentImportPrice,
                     ProductId = productId
                 };
             }
@@ -160,7 +175,6 @@ namespace store_management.Features.Importations
                     Brand = data.Brand,
                     Name = data.Name,
                     Pattern = data.Pattern,
-                    Price = data.Price,
                     Type = data.Type,
                     Size = data.Size,
                     QuantityRemain = data.Quantity + addedUnitCount,
@@ -178,7 +192,6 @@ namespace store_management.Features.Importations
                     Brand = data.Brand,
                     Name = data.Name,
                     Pattern = data.Pattern,
-                    Price = data.Price,
                     Type = data.Type,
                     Size = data.Size,
                     QuantityRemain = data.Quantity,

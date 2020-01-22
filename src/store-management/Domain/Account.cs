@@ -7,10 +7,9 @@ namespace store_management.Domain
     {
         public Account()
         {
-            IeReport = new HashSet<IeReport>();
             Invoice = new HashSet<Invoice>();
             OperationHistory = new HashSet<OperationHistory>();
-            SoldUnit = new HashSet<SoldUnit>();
+            Transaction = new HashSet<Transaction>();
         }
 
         public string Id { get; set; }
@@ -18,9 +17,8 @@ namespace store_management.Domain
         public string Password { get; set; }
         public string Salt { get; set; }
 
-        public virtual ICollection<IeReport> IeReport { get; set; }
         public virtual ICollection<Invoice> Invoice { get; set; }
         public virtual ICollection<OperationHistory> OperationHistory { get; set; }
-        public virtual ICollection<SoldUnit> SoldUnit { get; set; }
+        public virtual ICollection<Transaction> Transaction { get; set; }
     }
 }

@@ -20,5 +20,11 @@ namespace store_management.Infrastructure.Common
         public static string RIM = "RIM";
     }
 
+    public static class TransactionType
+    {
+        public static string IMPORT = "I";
+        public static string SOLD = "S";
+    }
+
     
 }

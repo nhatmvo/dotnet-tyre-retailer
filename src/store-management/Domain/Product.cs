@@ -7,7 +7,7 @@ namespace store_management.Domain
     {
         public Product()
         {
-            IeReport = new HashSet<IeReport>();
+            ImportUnit = new HashSet<ImportUnit>();
             PriceFluctuation = new HashSet<PriceFluctuation>();
         }
 
@@ -18,7 +18,6 @@ namespace store_management.Domain
         public string Brand { get; set; }
         public string Pattern { get; set; }
         public string ImagePath { get; set; }
-        public decimal Price { get; set; }
         public int QuantityRemain { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
@@ -26,7 +25,7 @@ namespace store_management.Domain
         public DateTime? ModifyDate { get; set; }
         public string ModifyBy { get; set; }
 
-        public virtual ICollection<IeReport> IeReport { get; set; }
+        public virtual ICollection<ImportUnit> ImportUnit { get; set; }
         public virtual ICollection<PriceFluctuation> PriceFluctuation { get; set; }
     }
 }

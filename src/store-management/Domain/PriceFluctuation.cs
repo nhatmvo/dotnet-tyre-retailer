@@ -7,7 +7,7 @@ namespace store_management.Domain
     {
         public PriceFluctuation()
         {
-            SoldUnit = new HashSet<SoldUnit>();
+            SaleUnit = new HashSet<SaleUnit>();
         }
 
         public string Id { get; set; }
@@ -19,6 +19,6 @@ namespace store_management.Domain
         public decimal? CurrentPrice { get; set; }
 
         public virtual Product Product { get; set; }
-        public virtual ICollection<SoldUnit> SoldUnit { get; set; }
+        public virtual ICollection<SaleUnit> SaleUnit { get; set; }
     }
 }

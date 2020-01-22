@@ -73,7 +73,6 @@ namespace store_management.Features.Products
                         Id = Guid.NewGuid().ToString(),
                         ChangedImportPrice = request.ProductData.ImportPrice != 0 ? request.ProductData.ImportPrice : pHistory.ChangedImportPrice,
                         CurrentImportPrice = pHistory.ChangedImportPrice,
-                        ChangedPrice = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price,
                         CurrentPrice = pHistory.ChangedPrice,
                         Date = DateTime.Now,
                         ProductId = request.Id
@@ -90,7 +89,6 @@ namespace store_management.Features.Products
                 productToUpdate.Brand = request.ProductData.Brand ?? productToUpdate.Brand;
                 productToUpdate.Pattern = request.ProductData.Pattern ?? productToUpdate.Pattern;
                 productToUpdate.ImagePath = request.ProductData.ImagePath ?? productToUpdate.ImagePath;
-                productToUpdate.Price = request.ProductData.Price != 0 ? request.ProductData.Price : productToUpdate.Price;
                 productToUpdate.QuantityRemain = productToUpdate.QuantityRemain + request.ProductData.Quantity;
                 productToUpdate.Description = request.ProductData.Description ?? productToUpdate.Description;
 
@@ -99,18 +97,6 @@ namespace store_management.Features.Products
 
                 _context.Product.Update(productToUpdate);
 
-                if (request.ProductData.Quantity != 0)
-                {
-                    var ieReport = new IeReport
-                    {
-                        Action = ActionConstants.EDIT_PRODUCT,
-                        ProductId = request.Id,
-                        CreateTime = DateTime.Now,
-                        QuantityUpdate = 1 * request.ProductData.Quantity,
-                        PriceUpdate = -1 * request.ProductData.Quantity * request.ProductData.ImportPrice
-                    };
-                    await _context.IeReport.AddAsync(ieReport);
-                }
                
 
                 await _context.SaveChangesAsync();

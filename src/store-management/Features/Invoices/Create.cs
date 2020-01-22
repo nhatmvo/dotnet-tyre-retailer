@@ -14,28 +14,29 @@ namespace store_management.Features.Invoices
     {
         public class InvoiceData
         {
-            public string ExportUnitId { get; set; }
-            public decimal? ExportPrice { get; set; }
+            public string SoldUnitId { get; set; }
+            public decimal? SoldPrice { get; set; }
         }
 
         public class InvoiceDataValidator : AbstractValidator<InvoiceData>
         {
             public InvoiceDataValidator()
             {
-                RuleFor(x => x.ExportUnitId).NotNull().NotEmpty();
+                RuleFor(x => x.SoldUnitId).NotNull().NotEmpty();
             }
         }
 
         public class Command : IRequest<InvoiceEnvelope>
         {
-            public List<InvoiceData> InvoiceData { get; set; }
+            public List<InvoiceData> InvoiceLinesData { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(x => x.InvoiceData).NotNull().NotEmpty();
+                RuleForEach(x => x.InvoiceLinesData).NotNull().NotEmpty()
+                    .SetValidator(new InvoiceDataValidator());
             }
         }
 
@@ -60,24 +61,23 @@ namespace store_management.Features.Invoices
                 };
                 await _context.Invoice.AddAsync(invoice);
 
-                foreach (var item in request.InvoiceData)
+                foreach (var item in request.InvoiceLinesData)
                 {
-                    var currentUnit = await _context.SoldUnit.FirstOrDefaultAsync(su => su.Id.Equals(item.ExportUnitId));
+                    var currentUnit = await _context.SaleUnit.FirstOrDefaultAsync(su => su.Id.Equals(item.SoldUnitId));
                     var product = (from p in _context.Product
                                    join pf in _context.PriceFluctuation on p.Id equals pf.ProductId
-                                   join s in _context.SoldUnit on pf.Id equals s.PriceFluctuationId
-                                   where s.Id == item.ExportUnitId
+                                   join s in _context.SaleUnit on pf.Id equals s.PriceFluctuationId
+                                   where s.Id == item.SoldUnitId
                                    select new
                                    {
                                        ProductName = p.Name,
                                        ProductType = p.Type
                                    }).FirstOrDefault();
 
-                    var exportPrice = item.ExportPrice ?? currentUnit.SalePrice;
+                    var exportPrice = item.SoldPrice ?? currentUnit.SalePrice;
                     var invoiceLine = new InvoiceLine()
                     {
                         ExportPrice = exportPrice,
-                        ProductName = product.ProductName,
                         Id = Guid.NewGuid().ToString(),
                         InvoiceId = invoice.Id,
                         Quantity = currentUnit.Quantity,

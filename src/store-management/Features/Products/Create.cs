@@ -77,7 +77,6 @@ namespace store_management.Features.Products
                 {
                     var insertProducts = new List<Product>();
                     var productsPriceFluctuation = new List<PriceFluctuation>();
-                    var exportImportReports = new List<IeReport>();
                     var now = DateTime.Now;
                     
                     foreach (var item in request.ProductsData)
@@ -95,7 +94,6 @@ namespace store_management.Features.Products
                             Type = item.Type,
                             Brand = item.Brand,
                             Pattern = item.Pattern,
-                            Price = item.Price,
                             QuantityRemain = item.Quantity,
                             Description = item.Description,
                             CreatedDate = now
@@ -113,20 +111,11 @@ namespace store_management.Features.Products
                         };
                         productsPriceFluctuation.Add(priceFluctuation);
 
-                        var exportImportReport = new IeReport
-                        {
-                            ProductId = productId,
-                            CreateTime = now,
-                            TotalQuantity = 1 * item.Quantity,
-                            TotalPrice = -1 * item.Quantity * item.ImportPrice
-                        };
-                        exportImportReports.Add(exportImportReport);
                     }
                     // Add list product
                     await _context.Product.AddRangeAsync(insertProducts);
                     // First init price fluctuation for inserted Product
                     await _context.PriceFluctuation.AddRangeAsync(productsPriceFluctuation);
-                    await _context.IeReport.AddRangeAsync(exportImportReports);
                     await _context.SaveChangesAsync();
                     return new ProductsEnvelope {
                         Products = insertProducts, 

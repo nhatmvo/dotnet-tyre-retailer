@@ -60,7 +60,18 @@ namespace store_management.Features.Sale
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
-                    List<SoldUnit> soldUnits = new List<SoldUnit>();
+                    List<SaleUnit> saleUnits = new List<SaleUnit>();
+                    var transactionId = Guid.NewGuid().ToString();
+                    var transaction = new Transaction
+                    {
+                        Id = transactionId,
+                        Billing = false,
+                        Type = "S",
+                        Date = _now
+                    };
+
+                    await _context.AddAsync(transaction, cancellationToken);
+
                     foreach (var item in request.SalesData)
                     {
                         var productToSell = await _context.Product.FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
@@ -69,23 +80,25 @@ namespace store_management.Features.Sale
                             var productPrice = await _context.PriceFluctuation
                                 .OrderByDescending(pf => pf.Date)
                                 .FirstOrDefaultAsync(pf => pf.ProductId.Equals(item.ProductId), cancellationToken);
-                            soldUnits.Add(new SoldUnit
+                            saleUnits.Add(new SaleUnit
                             {
                                 Id = Guid.NewGuid().ToString(),
                                 Billing = false,
-                                Datetime = _now,
                                 PriceFluctuationId = productPrice.Id,
                                 Quantity = item.Quantity,
                                 SalePrice = item.SalePrice,
-                                ReferPrice = productPrice.ChangedPrice
+                                ReferPrice = productPrice.ChangedPrice,
+                                TransactionId = transactionId
                             });
+
                         }
                         else
                             throw new RestException(HttpStatusCode.Conflict, new { });
                     }
-                    await _context.SoldUnit.AddRangeAsync(soldUnits);
-                    await _context.SaveChangesAsync();
-                    return new SaleEnvelope(soldUnits);
+                    await _context.SaleUnit.AddRangeAsync(saleUnits, cancellationToken);
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    return new SaleEnvelope(saleUnits);
                 }
                 else
                     throw new RestException(HttpStatusCode.BadRequest, new { });

@@ -10,17 +10,18 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace store_management.Features.Imports
+namespace store_management.Features.Sale
 {
     public class Details
     {
-        public class Query : IRequest<ImportEnvelope>
+        public class Query : IRequest<SaleEnvelope>
         {
-            public string Id { get; set; }
-            public Query (string id)
+            public Query(string id)
             {
                 Id = id;
             }
+
+            public string Id { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -31,7 +32,7 @@ namespace store_management.Features.Imports
             }
         }
 
-        public class Handler : IRequestHandler<Query, ImportEnvelope>
+        public class Handler : IRequestHandler<Query, SaleEnvelope>
         {
             private readonly StoreContext _context;
 
@@ -40,18 +41,15 @@ namespace store_management.Features.Imports
                 _context = context;
             }
 
-            public async Task<ImportEnvelope> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<SaleEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var validator = (new QueryValidator()).Validate(request);
                 if (validator.IsValid)
                 {
                     var transaction = await _context.Transaction
-                        .Include(t => t.ImportUnit)
+                        .Include(t => t.SaleUnit)
                         .FirstOrDefaultAsync(t => t.Id.Equals(request.Id), cancellationToken);
-                    return new ImportEnvelope
-                    {
-                        ImportUnits = transaction.ImportUnit.ToList()
-                    };
+                    return new SaleEnvelope(transaction.Date.Value, transaction.SaleUnit.ToList());
                 }
                 else
                     throw new RestException(HttpStatusCode.BadRequest, new { });
