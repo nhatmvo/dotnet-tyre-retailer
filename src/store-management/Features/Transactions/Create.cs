@@ -116,9 +116,9 @@ namespace store_management.Features.Transactions
                 var ieReport = new IeReport
                 {
                     Id = Guid.NewGuid().ToString(),
-                    UpdateTime = DateTime.Now,
-                    QuantityUpdate = request.TransactionData.Sum(a => a.Quantity),
-                    PriceUpdate = request.TransactionData.Sum(a => a.SalePrice)
+                    CreateTime = DateTime.Now,
+                    TotalQuantity = request.TransactionData.Sum(a => a.Quantity),
+                    TotalPrice = request.TransactionData.Sum(a => a.SalePrice)
                 };
 
                 await _context.IeReport.AddAsync(ieReport);

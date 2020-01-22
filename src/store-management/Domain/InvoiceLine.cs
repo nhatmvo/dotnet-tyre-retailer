@@ -11,7 +11,6 @@ namespace store_management.Domain
         }
 
         public string Id { get; set; }
-        public string ProductName { get; set; }
         public decimal? ExportPrice { get; set; }
         public int? Quantity { get; set; }
         public decimal? Total { get; set; }

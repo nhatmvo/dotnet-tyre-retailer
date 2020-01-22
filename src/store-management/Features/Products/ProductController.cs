@@ -25,35 +25,35 @@ namespace store_management.Features.Products
             return await _mediator.Send(new Details.Query(id));
         }
 
-        [HttpPost]
-        public async Task<ProductEnvelope> Create([FromBody] Create.Command command)
-        {
-            var product = new Details.Query(string.Empty, new Details.ProductData
-            {
-                Brand = command.ProductData.Brand,
-                Pattern = command.ProductData.Pattern,
-                Size = command.ProductData.Size,
-                Type = command.ProductData.Type
-            });
-            // if product is not null => create update object
-            if (product != null)
-            {
-                var productToUpdate = new Edit.Command
-                {
-                    Id = product.Id,
-                    ProductData = new Edit.ProductData
-                    {
-                        ImagePath = command.ProductData.ImagePath,
-                        ImportPrice = command.ProductData.ImportPrice,
-                        Price = command.ProductData.Price,
-                        Quantity = command.ProductData.Quantity
-                    }
-                };
-                return await _mediator.Send(productToUpdate);
-            }
+        //[HttpPost]
+        //public async Task<ProductEnvelope> Create([FromBody] Create.Command command)
+        //{
+        //    var product = new Details.Query(string.Empty, new Details.ProductData
+        //    {
+        //        Brand = command.ProductData.Brand,
+        //        Pattern = command.ProductData.Pattern,
+        //        Size = command.ProductData.Size,
+        //        Type = command.ProductData.Type
+        //    });
+        //    // if product is not null => create update object
+        //    if (product != null)
+        //    {
+        //        var productToUpdate = new Edit.Command
+        //        {
+        //            Id = product.Id,
+        //            ProductData = new Edit.ProductData
+        //            {
+        //                ImagePath = command.ProductData.ImagePath,
+        //                ImportPrice = command.ProductData.ImportPrice,
+        //                Price = command.ProductData.Price,
+        //                Quantity = command.ProductData.Quantity
+        //            }
+        //        };
+        //        return await _mediator.Send(productToUpdate);
+        //    }
 
-            return await _mediator.Send(command);
-        }
+        //    return await _mediator.Send(command);
+        //}
 
         [HttpPut]
         public async Task<ProductEnvelope> Edit([FromBody] Edit.Command command)

@@ -45,20 +45,20 @@ namespace store_management.Features.Products
             }
         }
 
-        public class Command : IRequest<ProductEnvelope>
+        public class Command : IRequest<ProductsEnvelope>
         {
-            public ProductData ProductData { get; set; }
+            public List<ProductData> ProductsData { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(x => x.ProductData).SetValidator(new ProductDataValidator());
+                RuleForEach(x => x.ProductsData).SetValidator(new ProductDataValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, ProductEnvelope>
+        public class Handler : IRequestHandler<Command, ProductsEnvelope>
         {
 
             private readonly StoreContext _context;
@@ -70,53 +70,73 @@ namespace store_management.Features.Products
                 _currentUserAccessor = currentUserAccessor;
             }
 
-            public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<ProductsEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
-                var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(request.ProductData.Name)
-                    && p.Brand.Equals(request.ProductData.Brand) && p.Size.Equals(request.ProductData.Size)
-                    && p.Pattern.Equals(request.ProductData.Pattern));
-                //if (product != null)
-                //    throw new RestException(HttpStatusCode.BadRequest, new { Product = Constants.EXISTED });
-                var productId = Guid.NewGuid().ToString();
-                var productToCreate = new Product()
+                var validator = (new CommandValidator()).Validate(request);
+                if (validator.IsValid)
                 {
-                    Id = productId,
-                    Name = request.ProductData.Name,
-                    Type = request.ProductData.Type,
-                    Brand = request.ProductData.Brand,
-                    Pattern = request.ProductData.Pattern,
-                    Price = request.ProductData.Price,
-                    QuantityRemain = request.ProductData.Quantity,
-                    Description = request.ProductData.Description,
-                    CreatedDate = DateTime.Now
-                    // Add created person
-                };
-                // Add product
-                await _context.Product.AddAsync(productToCreate);
-                // Then create price table ()
-                var priceFluctuation = new PriceFluctuation {
-                    Id = Guid.NewGuid().ToString(),
-                    ChangedImportPrice = request.ProductData.ImportPrice,
-                    ChangedPrice = request.ProductData.Price,
-                    Date = DateTime.Now,
-                    ProductId = productId
-                };
-                await _context.PriceFluctuation.AddAsync(priceFluctuation);
+                    var insertProducts = new List<Product>();
+                    var productsPriceFluctuation = new List<PriceFluctuation>();
+                    var exportImportReports = new List<IeReport>();
+                    var now = DateTime.Now;
+                    
+                    foreach (var item in request.ProductsData)
+                    {
+                        // check if insert product with 4 properties already existed
+                        var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(item.Type)
+                            && p.Name.Equals(item.Name) && p.Brand.Equals(item.Brand) && p.Pattern.Equals(item.Pattern));
+                        if (product != null)
+                            throw new RestException(HttpStatusCode.BadRequest, new { });
+                        var productId = Guid.NewGuid().ToString();
+                        var productToCreate = new Product
+                        {
+                            Id = productId,
+                            Name = item.Name,
+                            Type = item.Type,
+                            Brand = item.Brand,
+                            Pattern = item.Pattern,
+                            Price = item.Price,
+                            QuantityRemain = item.Quantity,
+                            Description = item.Description,
+                            CreatedDate = now
+                            // Add created person
+                        };
+                        insertProducts.Add(productToCreate);
 
-                // Update value into IE Report
-                var ieReport = new IeReport
-                {
-                    Action = ActionConstants.CREATE_PRODUCT,
-                    ProductId = productId,
-                    CreateTime = DateTime.Now,
-                    QuantityUpdate = 1 * request.ProductData.Quantity,
-                    PriceUpdate = -1 * request.ProductData.Quantity * request.ProductData.ImportPrice
-                };
-                await _context.IeReport.AddAsync(ieReport);
+                        var priceFluctuation = new PriceFluctuation
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            ChangedImportPrice = item.ImportPrice,
+                            ChangedPrice = item.Price,
+                            Date = now,
+                            ProductId = productId
+                        };
+                        productsPriceFluctuation.Add(priceFluctuation);
 
-                await _context.SaveChangesAsync();
-                
-                return new ProductEnvelope(productToCreate);
+                        var exportImportReport = new IeReport
+                        {
+                            ProductId = productId,
+                            CreateTime = now,
+                            TotalQuantity = 1 * item.Quantity,
+                            TotalPrice = -1 * item.Quantity * item.ImportPrice
+                        };
+                        exportImportReports.Add(exportImportReport);
+                    }
+                    // Add list product
+                    await _context.Product.AddRangeAsync(insertProducts);
+                    // First init price fluctuation for inserted Product
+                    await _context.PriceFluctuation.AddRangeAsync(productsPriceFluctuation);
+                    await _context.IeReport.AddRangeAsync(exportImportReports);
+                    await _context.SaveChangesAsync();
+                    return new ProductsEnvelope {
+                        Products = insertProducts, 
+                        ProductsCount = insertProducts.Count
+                    };
+                }
+                else
+                    throw new RestException(HttpStatusCode.BadRequest, new { });
+
+
             }
         }
     }

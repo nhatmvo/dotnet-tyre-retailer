@@ -105,10 +105,10 @@ namespace store_management.Domain
                 entity.ToTable("IE_REPORT");
 
                 entity.HasIndex(e => e.AccountId)
-                    .HasName("FK_IE_HISTORY__ACCOUNT");
+                    .HasName("FK_IE_HISTORY_ACCOUNT");
 
                 entity.HasIndex(e => e.ProductId)
-                    .HasName("FK_IE_HISOTRY_PRODUCT");
+                    .HasName("FK_IE_HISTORY_PRODUCT");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
@@ -132,33 +132,29 @@ namespace store_management.Domain
                     .HasColumnName("CREATE_TIME")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.PriceUpdate)
-                    .HasColumnName("PRICE_UPDATE")
-                    .HasColumnType("decimal(13,4)");
-
                 entity.Property(e => e.ProductId)
                     .HasColumnName("PRODUCT_ID")
                     .HasColumnType("varchar(50)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.QuantityUpdate)
-                    .HasColumnName("QUANTITY_UPDATE")
-                    .HasColumnType("int(11)");
+                entity.Property(e => e.TotalPrice)
+                    .HasColumnName("TOTAL_PRICE")
+                    .HasColumnType("decimal(13,4)");
 
-                entity.Property(e => e.UpdateTime)
-                    .HasColumnName("UPDATE_TIME")
-                    .HasColumnType("datetime");
+                entity.Property(e => e.TotalQuantity)
+                    .HasColumnName("TOTAL_QUANTITY")
+                    .HasColumnType("int(11)");
 
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.IeReport)
                     .HasForeignKey(d => d.AccountId)
-                    .HasConstraintName("FK_IE_HISTORY__ACCOUNT");
+                    .HasConstraintName("FK_IE_HISTORY_ACCOUNT");
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.IeReport)
                     .HasForeignKey(d => d.ProductId)
-                    .HasConstraintName("FK_IE_HISOTRY_PRODUCT");
+                    .HasConstraintName("FK_IE_HISTORY_PRODUCT");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
