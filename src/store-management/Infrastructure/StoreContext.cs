@@ -368,14 +368,14 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.ModifyBy)
-                    .HasColumnName("MODIFY_BY")
+                entity.Property(e => e.ModifiedBy)
+                    .HasColumnName("MODIFIED_BY")
                     .HasColumnType("varchar(50)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.ModifyDate)
-                    .HasColumnName("MODIFY_DATE")
+                entity.Property(e => e.ModifiedDate)
+                    .HasColumnName("MODIFIED_DATE")
                     .HasColumnType("datetime");
 
                 entity.Property(e => e.Name)

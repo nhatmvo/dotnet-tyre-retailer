@@ -24,9 +24,6 @@ namespace store_management.Features.Products
             public string Brand { get; set; }
             public string Pattern { get; set; }
             public string ImagePath { get; set; }
-            public decimal Price { get; set; }
-            public decimal ImportPrice { get; set; }
-            public int Quantity { get; set; }
             public string Description { get; set; }
         }
 
@@ -39,88 +36,62 @@ namespace store_management.Features.Products
                 RuleFor(x => x.Size).NotEmpty().NotNull();
                 RuleFor(x => x.Brand).NotEmpty().NotNull();
                 RuleFor(x => x.Pattern).NotEmpty().NotNull();
-                RuleFor(x => x.Price).NotEmpty().NotNull().GreaterThan(0);
-                RuleFor(x => x.ImportPrice).NotEmpty().NotNull().GreaterThan(0);
-                RuleFor(x => x.Quantity).NotEmpty().NotNull().GreaterThan(0);
             }
         }
 
-        public class Command : IRequest<ProductsEnvelope>
+        public class Command : IRequest<ProductEnvelope>
         {
-            public List<ProductData> ProductsData { get; set; }
+            public ProductData ProductData { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleForEach(x => x.ProductsData).SetValidator(new ProductDataValidator());
+                RuleFor(x => x.ProductData).SetValidator(new ProductDataValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, ProductsEnvelope>
+        public class Handler : IRequestHandler<Command, ProductEnvelope>
         {
 
             private readonly StoreContext _context;
+            private readonly DateTime _now;
             private readonly ICurrentUserAccessor _currentUserAccessor;
 
             public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
+                _now = DateTime.Now;
                 _context = context;
                 _currentUserAccessor = currentUserAccessor;
             }
 
-            public async Task<ProductsEnvelope> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
-                    var insertProducts = new List<Product>();
-                    var productsPriceFluctuation = new List<PriceFluctuation>();
-                    var now = DateTime.Now;
-                    
-                    foreach (var item in request.ProductsData)
+                    var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(request.ProductData.Type)
+                            && p.Name.Equals(request.ProductData.Name) && p.Brand.Equals(request.ProductData.Brand) && p.Pattern.Equals(request.ProductData.Pattern));
+                    if (product != null)
+                        throw new RestException(HttpStatusCode.BadRequest, new { });
+                    var productId = Guid.NewGuid().ToString();
+                    var productToCreate = new Product
                     {
-                        // check if insert product with 4 properties already existed
-                        var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(item.Type)
-                            && p.Name.Equals(item.Name) && p.Brand.Equals(item.Brand) && p.Pattern.Equals(item.Pattern));
-                        if (product != null)
-                            throw new RestException(HttpStatusCode.BadRequest, new { });
-                        var productId = Guid.NewGuid().ToString();
-                        var productToCreate = new Product
-                        {
-                            Id = productId,
-                            Name = item.Name,
-                            Type = item.Type,
-                            Brand = item.Brand,
-                            Pattern = item.Pattern,
-                            QuantityRemain = item.Quantity,
-                            Description = item.Description,
-                            CreatedDate = now
-                            // Add created person
-                        };
-                        insertProducts.Add(productToCreate);
-
-                        var priceFluctuation = new PriceFluctuation
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            ChangedImportPrice = item.ImportPrice,
-                            ChangedPrice = item.Price,
-                            Date = now,
-                            ProductId = productId
-                        };
-                        productsPriceFluctuation.Add(priceFluctuation);
-
-                    }
-                    // Add list product
-                    await _context.Product.AddRangeAsync(insertProducts);
-                    // First init price fluctuation for inserted Product
-                    await _context.PriceFluctuation.AddRangeAsync(productsPriceFluctuation);
-                    await _context.SaveChangesAsync();
-                    return new ProductsEnvelope {
-                        Products = insertProducts, 
-                        ProductsCount = insertProducts.Count
+                        Id = productId,
+                        Name = request.ProductData.Name,
+                        Type = request.ProductData.Type,
+                        Brand = request.ProductData.Brand,
+                        Pattern = request.ProductData.Pattern,
+                        Description = request.ProductData.Description,
+                        CreatedDate = _now
+                        // Add created person
                     };
+
+                    await _context.Product.AddAsync(productToCreate);
+                    await _context.SaveChangesAsync();
+
+                    return new ProductEnvelope(productToCreate);
                 }
                 else
                     throw new RestException(HttpStatusCode.BadRequest, new { });

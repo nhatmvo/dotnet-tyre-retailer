@@ -24,8 +24,8 @@ namespace store_management
 {
     public class Startup
     {
-        public const string DEFAULT_CONNECTION_STRING = "Server=localhost;Port=32769;Database=TIRE_MANAGEMENT_SYS;User=root;Password=nhat1997;";
-        public const string DEFAULT_DATABASE_PROVIDER = "mysql";
+        public const string DEFAULT_CONNECTION_STRING = "";
+        public const string DEFAULT_DATABASE_PROVIDER = "";
 
         public IConfiguration Configuration { get; }
 
@@ -39,8 +39,10 @@ namespace store_management
         {
             services.AddMediatR(Assembly.GetExecutingAssembly());
 
-            var connectionString = Configuration.GetValue<string>("") ?? DEFAULT_CONNECTION_STRING;
-            var databaseProvider = Configuration.GetValue<string>("") ?? DEFAULT_DATABASE_PROVIDER;
+            var connectionString = Configuration.GetConnectionString("DbConnection") ?? DEFAULT_CONNECTION_STRING;
+            var databaseProvider = Configuration.GetConnectionString("DbProviders") ?? DEFAULT_DATABASE_PROVIDER;
+
+            
 
             services.AddDbContext<StoreContext>(options =>
             {

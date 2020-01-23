@@ -39,8 +39,8 @@ namespace store_management.Features.Products
         {
             public QueryValidator()
             {
-                RuleFor(x => x.Id).NotNull().NotEmpty().Unless(x => x.ProductData == null);
-                RuleFor(x => x.ProductData).NotNull().Unless(x => string.IsNullOrEmpty(x.Id));
+                //RuleFor(x => x.Id).NotNull().NotEmpty().Unless(x => x.ProductData == null);
+                //RuleFor(x => x.ProductData).NotNull().Unless(x => string.IsNullOrEmpty(x.Id));
             }
         }
 
@@ -57,11 +57,11 @@ namespace store_management.Features.Products
 
             public async Task<ProductEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
-                var product = new Product();
                 var validationResult = (new QueryValidator()).Validate(request);
                 
                 if (validationResult.IsValid)
                 {
+                    var product = new Product();
                     if (!string.IsNullOrEmpty(request.Id))
                     {
                         product = await _context.Product

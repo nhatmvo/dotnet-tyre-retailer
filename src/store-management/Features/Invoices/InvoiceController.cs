@@ -19,11 +19,24 @@ namespace store_management.Features.Invoices
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<InvoiceEnvelope> Create(Create.Command command)
         {
             // Features\Invoices\Create.cs
             return await _mediator.Send(command);
+        }
+
+        [HttpGet]
+        public async Task<InvoiceEnvelope> Details(string invoiceNo)
+        {
+            //
+            return await _mediator.Send(new Details.Query(invoiceNo));
+        }
+
+        [HttpGet("List")]
+        public async Task<InvoicesEnvelope> List([FromQuery]List.Query query)
+        {
+            return await _mediator.Send(query);
         }
     }
 }

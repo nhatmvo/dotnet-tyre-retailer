@@ -25,9 +25,6 @@ namespace store_management.Features.Products
             public string Brand { get; set; }
             public string Pattern { get; set; }
             public string ImagePath { get; set; }
-            public decimal Price { get; set; }
-            public decimal ImportPrice { get; set; }
-            public int Quantity { get; set; }
             public string Description { get; set; }
         }
 
@@ -65,39 +62,20 @@ namespace store_management.Features.Products
                 if (productToUpdate == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
 
-                if (request.ProductData.Price != 0 || request.ProductData.ImportPrice != 0)
-                {
-                    var pHistory = await _context.PriceFluctuation.Where(p => p.ProductId.Equals(request.Id)).OrderByDescending(pf => pf.Date).FirstOrDefaultAsync();
-                    var priceFluctuation = new PriceFluctuation
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        ChangedImportPrice = request.ProductData.ImportPrice != 0 ? request.ProductData.ImportPrice : pHistory.ChangedImportPrice,
-                        CurrentImportPrice = pHistory.ChangedImportPrice,
-                        CurrentPrice = pHistory.ChangedPrice,
-                        Date = DateTime.Now,
-                        ProductId = request.Id
-                        
-                    };
-                    await _context.PriceFluctuation.AddAsync(priceFluctuation);
-                }
-
-
                 // check properties of product to insert
-                productToUpdate.Name = request.ProductData.Name ?? productToUpdate.Name;
-                productToUpdate.Type = request.ProductData.Type ?? productToUpdate.Type;
-                productToUpdate.Size = request.ProductData.Size ?? productToUpdate.Size;
-                productToUpdate.Brand = request.ProductData.Brand ?? productToUpdate.Brand;
-                productToUpdate.Pattern = request.ProductData.Pattern ?? productToUpdate.Pattern;
-                productToUpdate.ImagePath = request.ProductData.ImagePath ?? productToUpdate.ImagePath;
-                productToUpdate.QuantityRemain = productToUpdate.QuantityRemain + request.ProductData.Quantity;
-                productToUpdate.Description = request.ProductData.Description ?? productToUpdate.Description;
+                productToUpdate.Name = string.IsNullOrEmpty(request.ProductData.Name) ? productToUpdate.Name : request.ProductData.Name;
+                productToUpdate.Type = string.IsNullOrEmpty(request.ProductData.Type) ? productToUpdate.Type : request.ProductData.Type;
+                productToUpdate.Size = string.IsNullOrEmpty(request.ProductData.Size) ? productToUpdate.Size : request.ProductData.Size;
+                productToUpdate.Brand = string.IsNullOrEmpty(request.ProductData.Brand) ? productToUpdate.Brand : request.ProductData.Brand;
+                productToUpdate.Pattern = string.IsNullOrEmpty(request.ProductData.Pattern) ? productToUpdate.Pattern : request.ProductData.Pattern;
+                productToUpdate.ImagePath = string.IsNullOrEmpty(request.ProductData.ImagePath) ? productToUpdate.ImagePath : request.ProductData.ImagePath;
+                productToUpdate.Description = string.IsNullOrEmpty(request.ProductData.Description) ? productToUpdate.Description : request.ProductData.Description;
+
 
                 // Update last modify by and last modify date
-                productToUpdate.ModifyDate = DateTime.Now;
+                productToUpdate.ModifiedDate = DateTime.Now;
 
                 _context.Product.Update(productToUpdate);
-
-               
 
                 await _context.SaveChangesAsync();
 

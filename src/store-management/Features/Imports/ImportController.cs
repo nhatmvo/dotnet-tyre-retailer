@@ -32,7 +32,7 @@ namespace store_management.Features.Imports
             return await _mediator.Send(new Details.Query(id));
         }
 
-        [HttpGet]
+        [HttpGet("List")]
         public async Task<ImportsEnvelope> List([FromQuery] List.Query query)
         {
             return await _mediator.Send(query);

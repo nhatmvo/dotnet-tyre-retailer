@@ -22,8 +22,8 @@ namespace store_management.Domain
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string CreatedBy { get; set; }
-        public DateTime? ModifyDate { get; set; }
-        public string ModifyBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+        public string ModifiedBy { get; set; }
 
         public virtual ICollection<ImportUnit> ImportUnit { get; set; }
         public virtual ICollection<PriceFluctuation> PriceFluctuation { get; set; }

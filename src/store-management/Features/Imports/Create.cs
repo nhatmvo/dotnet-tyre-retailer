@@ -148,8 +148,8 @@ namespace store_management.Features.Imports
                     Id = Guid.NewGuid().ToString(),
                     ChangedImportPrice = data.ImportPrice,
                     ChangedPrice = data.Price,
-                    CurrentImportPrice = existedProduct.PriceFluctuation.FirstOrDefault().ChangedImportPrice,
-                    CurrentPrice = existedProduct.PriceFluctuation.FirstOrDefault().CurrentImportPrice,
+                    CurrentImportPrice = existedProduct.PriceFluctuation.FirstOrDefault() != null ? existedProduct.PriceFluctuation.FirstOrDefault().ChangedImportPrice : 0,
+                    CurrentPrice = existedProduct.PriceFluctuation.FirstOrDefault() != null ? existedProduct.PriceFluctuation.FirstOrDefault().CurrentImportPrice : 0,
                     ProductId = productId
                 };
             }
@@ -179,7 +179,7 @@ namespace store_management.Features.Imports
                     Size = data.Size,
                     QuantityRemain = data.Quantity + addedUnitCount,
                     //ModifyBy = ,
-                    ModifyDate = _now
+                    ModifiedDate = _now
                 };
                 return productToUpdate;
             }
@@ -205,8 +205,8 @@ namespace store_management.Features.Imports
 
             private async Task<Product> GetProductByProps(string pattern, string type, string brand, string size)
             {
-                var product = await _context.Product
-                    .Include(p => p.PriceFluctuation.OrderByDescending(pf => pf.Date).FirstOrDefault())
+                var product = await _context.Product.AsNoTracking()
+                    .Include(p => p.PriceFluctuation)
                     .FirstOrDefaultAsync(p => p.Pattern.Equals(pattern) && p.Type.Equals(type)
                         && p.Brand.Equals(brand) && p.Size.Equals(size));
                 return product;

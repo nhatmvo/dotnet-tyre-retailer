@@ -61,6 +61,8 @@ namespace store_management.Features.Sale
                 if (validator.IsValid)
                 {
                     List<SaleUnit> saleUnits = new List<SaleUnit>();
+                    List<Product> updateProducts = new List<Product>();
+
                     var transactionId = Guid.NewGuid().ToString();
                     var transaction = new Transaction
                     {
@@ -78,6 +80,7 @@ namespace store_management.Features.Sale
                         if (productToSell != null)
                         {
                             var productPrice = await _context.PriceFluctuation
+                                .AsNoTracking()
                                 .OrderByDescending(pf => pf.Date)
                                 .FirstOrDefaultAsync(pf => pf.ProductId.Equals(item.ProductId), cancellationToken);
                             saleUnits.Add(new SaleUnit
@@ -91,10 +94,15 @@ namespace store_management.Features.Sale
                                 TransactionId = transactionId
                             });
 
-                        }
+                            productToSell.QuantityRemain -= item.Quantity;
+                            if (productToSell.QuantityRemain < 0) throw new RestException(HttpStatusCode.BadRequest, new { });
+                            updateProducts.Add(productToSell);
+
+                        } 
                         else
                             throw new RestException(HttpStatusCode.Conflict, new { });
                     }
+                    _context.Product.UpdateRange(updateProducts);
                     await _context.SaleUnit.AddRangeAsync(saleUnits, cancellationToken);
 
                     await _context.SaveChangesAsync(cancellationToken);

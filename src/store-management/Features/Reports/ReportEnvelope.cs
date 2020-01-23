@@ -7,5 +7,6 @@ namespace store_management.Features.Reports
 {
     public class ReportEnvelope
     {
+
     }
 }
