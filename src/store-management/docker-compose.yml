@@ -1,0 +1,22 @@
+version: '3.0'
+
+services: 
+    db:
+        image: mysql
+        environment: 
+            MYSQL_ROOT_PASSWORD: nhat1997
+        volumes: 
+            - dbdata:/var/lib/mysql
+            - ./resources:/docker-entrypoint-initdb.d
+        restart: always
+
+    tire-store-management:
+        depends_on: 
+            - db
+        image: hikari192/tyrestore
+        build: 
+            context: .
+        ports: 
+            - "8080:80"
+volumes: 
+    dbdata:
