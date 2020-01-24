@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -19,6 +20,8 @@ namespace store_management.Domain
         public string Pattern { get; set; }
         public string ImagePath { get; set; }
         public int QuantityRemain { get; set; }
+        [NotMapped]
+        public decimal Price { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string CreatedBy { get; set; }

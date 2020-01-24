@@ -42,11 +42,14 @@ namespace store_management.Features.Products
             public async Task<ProductsEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 IQueryable<Product> queryable = _context.Product.GetAllData();
+                int total = queryable.Count();
+
                 if (request.Filter == null) {
                     var result = await queryable.ToListAsync();
                     return new ProductsEnvelope {
                         Products = result,
-                        ProductsCount = result.Count()
+                        ProductsCount = result.Count(),
+                        FilterEnvelope = GetAvailableFilter(request.Filter)
                     };
                 } 
 
@@ -75,9 +78,50 @@ namespace store_management.Features.Products
                 return new ProductsEnvelope()
                 {
                     Products = products,
-                    ProductsCount = products.Count
+                    ProductsCount = total,
+                    FilterEnvelope = GetAvailableFilter(request.Filter)
                 };
             }
+
+            private FilterEnvelope GetAvailableFilter(ProductsFilter pFilter)
+            {
+                var queryable = _context.Product.AsQueryable();
+                if (pFilter == null)
+                {
+                    return new FilterEnvelope
+                    {
+                        Brands = queryable.Select(p => p.Brand).Distinct().ToList(),
+                        Types = queryable.Select(p => p.Type).Distinct().ToList(),
+                        Patterns = queryable.Select(p => p.Pattern).Distinct().ToList(),
+                        Sizes = queryable.Select(p => p.Size).Distinct().ToList()
+                    };
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(pFilter.Type)) 
+                        queryable = queryable.Where(p => p.Type.Equals(pFilter.Type));
+                    if (!string.IsNullOrEmpty(pFilter.Branch))
+                        queryable = queryable.Where(p => p.Brand.Equals(pFilter.Branch));
+                    if (!string.IsNullOrEmpty(pFilter.Pattern))
+                        queryable = queryable.Where(p => p.Pattern.Equals(pFilter.Pattern));
+                    if (!string.IsNullOrEmpty(pFilter.Size))
+                        queryable = queryable.Where(p => p.Size.Equals(pFilter.Size));
+
+                    return new FilterEnvelope
+                    {
+                        Brands = queryable.Select(p => p.Brand).Distinct().ToList(),
+                        Types = queryable.Select(p => p.Type).Distinct().ToList(),
+                        Patterns = queryable.Select(p => p.Pattern).Distinct().ToList(),
+                        Sizes = queryable.Select(p => p.Size).Distinct().ToList()
+                    };
+
+                }
+                        
+                
+
         }
+        }
+
+        
     }
 }

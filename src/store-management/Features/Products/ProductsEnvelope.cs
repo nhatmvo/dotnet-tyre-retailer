@@ -10,6 +10,23 @@ namespace store_management.Features.Products
     {
         public List<Product> Products { get; set; }
         public int ProductsCount { get; set; }
+        public FilterEnvelope FilterEnvelope { get; set; }
+    }
+
+    public class FilterEnvelope
+    {
+        public List<string> Brands { get; set; }
+        public List<string> Sizes { get; set; }
+        public List<string> Patterns { get; set; }
+        public List<string> Types { get; set; }
+    }
+
+    public enum FilterPriorities
+    {
+        TYPE = 1, 
+        BRAND = 2,
+        PATTERN = 3, 
+        SIZE = 4
     }
 
     public class ProductsFilter
