@@ -28,6 +28,12 @@ namespace store_management.Features.Invoices
         public class Query : IRequest<InvoicesEnvelope>
         {
             public InvoiceFilter Filter { get; set; }
+
+            public Query()
+            {
+
+            }
+
             public Query(InvoiceFilter filter)
             {
                 Filter = filter;
@@ -46,15 +52,17 @@ namespace store_management.Features.Invoices
             public async Task<InvoicesEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var queryable = _context.Invoice.GetAllData();
-
-                if (request.Filter != null)
+                
+                if (request.Filter == null)
                 {
-                    if (request.Filter.FromDate != null)
-                        queryable = queryable.Where(q => q.ExportDate >= request.Filter.FromDate);
-                    if (request.Filter.ToDate != null)
-                        queryable = queryable.Where(q => q.ExportDate <= request.Filter.ToDate);
+                    var result = await queryable.ToListAsync();
+                    return new InvoicesEnvelope(result);
 
                 }
+                if (request.Filter.FromDate != null)
+                    queryable = queryable.Where(q => q.ExportDate >= request.Filter.FromDate);
+                if (request.Filter.ToDate != null)
+                    queryable = queryable.Where(q => q.ExportDate <= request.Filter.ToDate);
                 var invoices = await queryable
                     .Skip(request.Filter.Offset ?? 0)
                     .Take(request.Filter.Limit ?? 10)
