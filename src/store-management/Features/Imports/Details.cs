@@ -46,11 +46,11 @@ namespace store_management.Features.Imports
                 if (validator.IsValid)
                 {
                     var transaction = await _context.Transaction
-                        .Include(t => t.ImportUnit)
+                        .Include(t => t.ProductImport)
                         .FirstOrDefaultAsync(t => t.Id.Equals(request.Id), cancellationToken);
                     return new ImportEnvelope
                     {
-                        ImportUnits = transaction.ImportUnit.ToList()
+                        ProductImports = transaction.ProductImport.ToList()
                     };
                 }
                 else

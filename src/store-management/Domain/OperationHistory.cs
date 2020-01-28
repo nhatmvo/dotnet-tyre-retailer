@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace store_management.Domain
@@ -10,7 +11,7 @@ namespace store_management.Domain
         public string Action { get; set; }
         public string Message { get; set; }
         public DateTime? ActionDate { get; set; }
-
+        [JsonIgnore]
         public virtual Account Account { get; set; }
     }
 }

@@ -23,9 +23,8 @@ namespace store_management.Features.Imports
             public string Size { get; set; }
             public string Brand { get; set; }
             public string Pattern { get; set; }
-            public decimal Price { get; set; }
             public decimal ImportPrice { get; set; }
-            public int Quantity { get; set; }
+            public int ImportAmount { get; set; }
         }
 
         public class ImportDataValidator : AbstractValidator<ImportData>
@@ -37,9 +36,8 @@ namespace store_management.Features.Imports
                 RuleFor(x => x.Size).NotEmpty().NotNull();
                 RuleFor(x => x.Brand).NotEmpty().NotNull();
                 RuleFor(x => x.Pattern).NotEmpty().NotNull();
-                RuleFor(x => x.Price).NotEmpty().NotNull().GreaterThan(0);
                 RuleFor(x => x.ImportPrice).NotEmpty().NotNull().GreaterThan(0);
-                RuleFor(x => x.Quantity).NotEmpty().NotNull().GreaterThan(0);
+                RuleFor(x => x.ImportAmount).NotEmpty().NotNull().GreaterThan(0);
             }
         }
 
@@ -78,8 +76,7 @@ namespace store_management.Features.Imports
 
                     var productsInsert = new List<Product>();
                     var productsUpdate = new List<Product>();
-                    var importUnits = new List<ImportUnit>();
-                    var priceFluctuationInsert = new List<PriceFluctuation>();
+                    var productImports = new List<ProductImport>();
 
                     // Create a transaction 
                     var transaction = new Transaction
@@ -103,37 +100,36 @@ namespace store_management.Features.Imports
                         {
                             productId = Guid.NewGuid().ToString();
                             productsInsert.Add(GetCreateProduct(productId, item));
-                            priceFluctuationInsert.Add(GetProductPriceFlucCreate(productId, item.ImportPrice, item.Price));
                         }
                         else
                         {
                             productId = product.Id;
-                            productsUpdate.Add(GetUpdateProduct(productId, item, product.QuantityRemain));
-                            priceFluctuationInsert.Add(GetProductPriceFlucUpdate(productId, item, product));
+                            productsUpdate.Add(GetUpdateProduct(product, item, product.TotalQuantity));
                         }
-                        var importUnit = new ImportUnit
+                        var productImport = new ProductImport
                         {
                             Id = Guid.NewGuid().ToString(),
                             ImportPrice = item.ImportPrice,
                             ProductId = productId,
-                            Quantity = item.Quantity,
+                            Date = DateTime.Now,
+                            ImportQuantity = item.ImportAmount,
+                            RemainQuantity = item.ImportAmount,
                             TransactionId = transactionId
                         };
-                        importUnits.Add(importUnit);
+                        productImports.Add(productImport);
 
 
                     }
                     await _context.Product.AddRangeAsync(productsInsert);
                     _context.Product.UpdateRange(productsUpdate);
 
-                    await _context.PriceFluctuation.AddRangeAsync(priceFluctuationInsert);
-                    await _context.ImportUnit.AddRangeAsync(importUnits);
+                    await _context.ProductImport.AddRangeAsync(productImports);
 
                     await _context.SaveChangesAsync();
 
                     return new ImportEnvelope
                     {
-                        ImportUnits = importUnits
+                        ProductImports = productImports
                     };
                 } else
                 {
@@ -141,46 +137,11 @@ namespace store_management.Features.Imports
                 }
             }
 
-            private PriceFluctuation GetProductPriceFlucUpdate(string productId, ImportData data, Product existedProduct)
+
+            private Product GetUpdateProduct(Product productToUpdate, ImportData data, int addedUnitCount)
             {
-                return new PriceFluctuation
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ChangedImportPrice = data.ImportPrice,
-                    ChangedPrice = data.Price,
-                    CurrentImportPrice = existedProduct.PriceFluctuation.FirstOrDefault() != null ? existedProduct.PriceFluctuation.FirstOrDefault().ChangedImportPrice : 0,
-                    CurrentPrice = existedProduct.PriceFluctuation.FirstOrDefault() != null ? existedProduct.PriceFluctuation.FirstOrDefault().CurrentImportPrice : 0,
-                    ProductId = productId
-                };
-            }
-
-
-            private PriceFluctuation GetProductPriceFlucCreate(string productId, decimal importPrice, decimal refPrice)
-            {
-                return new PriceFluctuation
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ChangedPrice = refPrice,
-                    ChangedImportPrice = importPrice,
-                    ProductId = productId
-                };
-            }
-
-
-            private Product GetUpdateProduct(string productId, ImportData data, int addedUnitCount)
-            {
-                var productToUpdate = new Product
-                {
-                    Id = productId,
-                    Brand = data.Brand,
-                    Name = data.Name,
-                    Pattern = data.Pattern,
-                    Type = data.Type,
-                    Size = data.Size,
-                    QuantityRemain = data.Quantity + addedUnitCount,
-                    //ModifyBy = ,
-                    ModifiedDate = _now
-                };
+                productToUpdate.RefPrice = data.ImportPrice;
+                productToUpdate.ModifiedDate = _now;
                 return productToUpdate;
             }
 
@@ -194,7 +155,7 @@ namespace store_management.Features.Imports
                     Pattern = data.Pattern,
                     Type = data.Type,
                     Size = data.Size,
-                    QuantityRemain = data.Quantity,
+                    RefPrice = data.ImportPrice,
                     //CreatedBy = ,
                     CreatedDate = _now
                 };
@@ -206,7 +167,6 @@ namespace store_management.Features.Imports
             private async Task<Product> GetProductByProps(string pattern, string type, string brand, string size)
             {
                 var product = await _context.Product.AsNoTracking()
-                    .Include(p => p.PriceFluctuation)
                     .FirstOrDefaultAsync(p => p.Pattern.Equals(pattern) && p.Type.Equals(type)
                         && p.Brand.Equals(brand) && p.Size.Equals(size));
                 return product;

@@ -9,17 +9,17 @@ namespace store_management.Features.Sale
     public class SaleEnvelope
     {
 
-        public SaleEnvelope(List<SaleUnit> saleUnits)
+        public SaleEnvelope(List<ProductSale> saleUnits)
         {
             SaleUnits = saleUnits;
         }
 
-        public SaleEnvelope(DateTime saleDatetime, List<SaleUnit> saleUnits)
+        public SaleEnvelope(DateTime saleDatetime, List<ProductSale> saleUnits)
         {
             SaleUnits = saleUnits;
             SaleDatetime = saleDatetime;
         }
-        public List<SaleUnit> SaleUnits { get; set; }
+        public List<ProductSale> SaleUnits { get; set; }
         public DateTime SaleDatetime { get; set; }
     }
 

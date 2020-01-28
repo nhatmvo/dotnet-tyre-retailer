@@ -10,7 +10,7 @@ namespace store_management.Features.Products
     {
         public List<Product> Products { get; set; }
         public int ProductsCount { get; set; }
-        public FilterEnvelope FilterEnvelope { get; set; }
+        public FilterEnvelope AvailableFilter { get; set; }
     }
 
     public class FilterEnvelope
@@ -36,18 +36,18 @@ namespace store_management.Features.Products
 
         }
 
-        public ProductsFilter (string type, string size, string branch, string pattern, int limit, int offset)
+        public ProductsFilter (string type, string size, string brand, string pattern, int limit, int offset)
         {
             Type = type;
             Size = size;
-            Branch = branch;
+            Brand = brand;
             Pattern = pattern;
             Limit = limit;
             Offset = offset;
         }
         public string Type { get; set; }
         public string Size { get; set; }
-        public string Branch { get; set; }
+        public string Brand { get; set; }
         public string Pattern { get; set; }
         public int? Limit { get; set; }
         public int? Offset { get; set; }

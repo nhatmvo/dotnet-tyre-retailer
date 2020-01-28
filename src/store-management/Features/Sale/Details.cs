@@ -47,9 +47,9 @@ namespace store_management.Features.Sale
                 if (validator.IsValid)
                 {
                     var transaction = await _context.Transaction
-                        .Include(t => t.SaleUnit)
+                        .Include(t => t.ProductSale)
                         .FirstOrDefaultAsync(t => t.Id.Equals(request.Id), cancellationToken);
-                    return new SaleEnvelope(transaction.Date.Value, transaction.SaleUnit.ToList());
+                    return new SaleEnvelope(transaction.Date.Value, transaction.ProductSale.ToList());
                 }
                 else
                     throw new RestException(HttpStatusCode.BadRequest, new { });

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace store_management.Domain
@@ -17,8 +18,9 @@ namespace store_management.Domain
         public decimal? Total { get; set; }
         public string AccountId { get; set; }
         public string CustomerId { get; set; }
-
+        [JsonIgnore]
         public virtual Account Account { get; set; }
+        [JsonIgnore]
         public virtual Customer Customer { get; set; }
         public virtual ICollection<InvoiceLine> InvoiceLine { get; set; }
     }

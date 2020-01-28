@@ -37,7 +37,7 @@ namespace store_management.Features.Sale
             public async Task<SalesEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var queryable = _context.Transaction.Where(t => t.Type.Equals(TransactionType.SOLD))
-                    .Include(t => t.SaleUnit);
+                    .Include(t => t.ProductSale);
                 
                 if (request.Filter != null)
                 {

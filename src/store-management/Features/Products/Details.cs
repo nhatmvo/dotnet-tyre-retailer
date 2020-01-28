@@ -65,27 +65,17 @@ namespace store_management.Features.Products
                     if (!string.IsNullOrEmpty(request.Id))
                     {
                         product = await _context.Product
-                            .Include(p => p.PriceFluctuation)
                             .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
-                        var priceFlucVal = product.PriceFluctuation.OrderByDescending(pf => pf.Date).FirstOrDefault();
-                        if (priceFlucVal != null)
-                            product.Price = priceFlucVal.ChangedImportPrice;
-                        else product.Price = 0;
                         if (product == null)
                             throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
                     }
                     else if (request.ProductData != null)
                     {
                         product = await _context.Product
-                            .Include(p => p.PriceFluctuation)
                             .FirstOrDefaultAsync(p => p.Brand.Equals(request.ProductData.Brand)
                             && p.Pattern.Equals(request.ProductData.Pattern)
                             && p.Size.Equals(request.ProductData.Size)
                             && p.Type.Equals(request.ProductData.Type));
-                        var priceFlucVal = product.PriceFluctuation.OrderByDescending(pf => pf.Date).FirstOrDefault();
-                        if (priceFlucVal != null)
-                            product.Price = priceFlucVal.ChangedImportPrice;
-                        else product.Price = 0;
                         if (product == null)
                             throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
                     }

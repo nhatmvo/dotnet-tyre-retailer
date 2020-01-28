@@ -17,7 +17,7 @@ namespace store_management.Features.Sale
         public class SaleData
         {
             public string ProductId { get; set; }
-            public int Quantity { get; set; }
+            public int SaleAmount { get; set; }
             public decimal SalePrice { get; set; }
         }
 
@@ -26,7 +26,7 @@ namespace store_management.Features.Sale
             public SaleDataValidator()
             {
                 RuleFor(x => x.ProductId).NotNull().NotEmpty();
-                RuleFor(x => x.Quantity).NotNull().NotEmpty().GreaterThan(0);
+                RuleFor(x => x.SaleAmount).NotNull().NotEmpty().GreaterThan(0);
                 RuleFor(x => x.SalePrice).NotNull().NotEmpty().GreaterThan(0);
             }
         }
@@ -60,8 +60,8 @@ namespace store_management.Features.Sale
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
-                    List<SaleUnit> saleUnits = new List<SaleUnit>();
-                    List<Product> updateProducts = new List<Product>();
+                    List<ProductSale> saleUnits = new List<ProductSale>();
+                    List<ProductImport> productImportsToUpdate = new List<ProductImport>();
 
                     var transactionId = Guid.NewGuid().ToString();
                     var transaction = new Transaction
@@ -73,39 +73,80 @@ namespace store_management.Features.Sale
                     };
 
                     await _context.AddAsync(transaction, cancellationToken);
-
+                    // When a product is sold, 3 tables will be updated:
+                    // 1. Create Product Sale record
+                    // 2. Create Relationship between Product Sale and Product Import => get the oldest Product Import with remaining quantity higher than 0
+                    // 3. Substract Product Import quantity 
                     foreach (var item in request.SalesData)
                     {
-                        var productToSell = await _context.Product.FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+                        var productToSell = await _context.Product
+                            .Include(p => p.ProductImport)
+                            .FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+                            
                         if (productToSell != null)
                         {
-                            var productPrice = await _context.PriceFluctuation
-                                .AsNoTracking()
-                                .OrderByDescending(pf => pf.Date)
-                                .FirstOrDefaultAsync(pf => pf.ProductId.Equals(item.ProductId), cancellationToken);
-                            saleUnits.Add(new SaleUnit
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                Billing = false,
-                                PriceFluctuationId = productPrice.Id,
-                                Quantity = item.Quantity,
-                                SalePrice = item.SalePrice,
-                                ReferPrice = productPrice.ChangedPrice,
-                                TransactionId = transactionId
-                            });
+                            if (productToSell.TotalQuantity < item.SaleAmount) // if sale amount is greater than available quantity a product has
+                                throw new RestException(HttpStatusCode.BadRequest, new { });
 
-                            productToSell.QuantityRemain -= item.Quantity;
-                            if (productToSell.QuantityRemain < 0) throw new RestException(HttpStatusCode.BadRequest, new { });
-                            updateProducts.Add(productToSell);
+                            // when selling a product, the oldest Product Import with remaining quantity higher than 0 will be substracted
+                            var productImports = productToSell.ProductImport.Where(pi => pi.RemainQuantity > 0).OrderBy(pi => pi.Date).ToList();
+                            if (productImports.Count != 0)
+                            {
+                                // with each productToSell - create a record in ProductSale table
+                                string pdSaleId = Guid.NewGuid().ToString();
+
+                                saleUnits.Add(new ProductSale
+                                {
+                                    Id = pdSaleId,
+                                    ProductId = productToSell.Id,
+                                    Quantity = item.SaleAmount,
+                                    SalePrice = item.SalePrice,
+                                    TransactionId = transactionId
+                                });
+                                var saleAmount = item.SaleAmount;
+                                for (int i = 0; i < productImports.Count; i++)
+                                {
+                                    // if remaining quantity is greater than sale amount => update remain quantity by current remain quantity substract sale amount
+                                    if (productImports[i].RemainQuantity > saleAmount)
+                                    {
+                                        await _context.SaleImportReport.AddAsync(new SaleImportReport
+                                        {
+                                            ProductImportId = productImports[i].Id,
+                                            ProductSaleId = pdSaleId,
+                                            Quantity = saleAmount
+                                        });
+                                        productImports[i].RemainQuantity -= saleAmount;
+                                        break;
+                                    }
+                                    // if remaining quantity is lower than sale amount => remain quantity is set to 0 and continue loop
+                                    else
+                                    {
+                                        saleAmount -= productImports[i].RemainQuantity.Value;
+                                        await _context.SaleImportReport.AddAsync(new SaleImportReport
+                                        {
+                                            ProductImportId = productImports[i].Id,
+                                            ProductSaleId = pdSaleId,
+                                            Quantity = productImports[i].RemainQuantity.Value
+                                        });
+                                        productImports[i].RemainQuantity = 0;
+                                    }
+                                }
+
+                            }
+                            else // if a product don't have any product import which has quantity left
+                            {
+                                throw new RestException(HttpStatusCode.BadRequest, new { });
+                            }
+                            _context.ProductImport.UpdateRange(productImports);
 
                         } 
                         else
                             throw new RestException(HttpStatusCode.Conflict, new { });
                     }
-                    _context.Product.UpdateRange(updateProducts);
-                    await _context.SaleUnit.AddRangeAsync(saleUnits, cancellationToken);
-
+                    
+                    await _context.ProductSale.AddRangeAsync(saleUnits, cancellationToken);
                     await _context.SaveChangesAsync(cancellationToken);
+
                     return new SaleEnvelope(saleUnits);
                 }
                 else

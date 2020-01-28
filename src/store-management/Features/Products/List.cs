@@ -49,23 +49,27 @@ namespace store_management.Features.Products
                     return new ProductsEnvelope {
                         Products = result,
                         ProductsCount = result.Count(),
-                        FilterEnvelope = GetAvailableFilter(request.Filter)
+                        AvailableFilter = GetAvailableFilter(request.Filter)
                     };
                 } 
 
                 if (!string.IsNullOrEmpty(request.Filter.Pattern))
                 {
-                    queryable = queryable.Where(q => q.Pattern.Contains(request.Filter.Pattern));
+                    queryable = queryable.Where(q => q.Pattern.ToLower().Contains(request.Filter.Pattern.ToLower()));
                 }
 
-                if (!string.IsNullOrEmpty(request.Filter.Branch))
+                if (!string.IsNullOrEmpty(request.Filter.Brand))
                 {
-                    queryable = queryable.Where(q => q.Brand.Contains(request.Filter.Branch));
+                    queryable = queryable.Where(q => q.Brand.ToLower().Contains(request.Filter.Brand.ToLower()));
                 }
 
                 if (!string.IsNullOrEmpty(request.Filter.Type))
                 {
-                    queryable = queryable.Where(q => q.Type.Equals(request.Filter.Type));
+                    queryable = queryable.Where(q => q.Type.ToLower().Equals(request.Filter.Type.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(request.Filter.Size))
+                {
+                    queryable = queryable.Where(q => q.Size.ToLower().Equals(request.Filter.Size.ToLower()));
                 }
 
                 
@@ -79,7 +83,7 @@ namespace store_management.Features.Products
                 {
                     Products = products,
                     ProductsCount = total,
-                    FilterEnvelope = GetAvailableFilter(request.Filter)
+                    AvailableFilter = GetAvailableFilter(request.Filter)
                 };
             }
 
@@ -100,8 +104,8 @@ namespace store_management.Features.Products
                 {
                     if (!string.IsNullOrEmpty(pFilter.Type)) 
                         queryable = queryable.Where(p => p.Type.Equals(pFilter.Type));
-                    if (!string.IsNullOrEmpty(pFilter.Branch))
-                        queryable = queryable.Where(p => p.Brand.Equals(pFilter.Branch));
+                    if (!string.IsNullOrEmpty(pFilter.Brand))
+                        queryable = queryable.Where(p => p.Brand.Equals(pFilter.Brand));
                     if (!string.IsNullOrEmpty(pFilter.Pattern))
                         queryable = queryable.Where(p => p.Pattern.Equals(pFilter.Pattern));
                     if (!string.IsNullOrEmpty(pFilter.Size))

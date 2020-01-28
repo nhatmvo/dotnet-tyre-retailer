@@ -11,15 +11,7 @@ namespace store_management.Features.Products
     {
         public static IQueryable<Product> GetAllData(this DbSet<Product> products)
         {
-            var listProds = products.Include(p => p.PriceFluctuation);
-            foreach (var product in listProds)
-            {
-                var priceFlucVal = product.PriceFluctuation.OrderByDescending(pf => pf.Date).FirstOrDefault();
-                if (priceFlucVal != null)
-                    product.Price = priceFlucVal.ChangedImportPrice;
-                else product.Price = 0;
-            }
-            return listProds;
+            return products.Include(p => p.ProductImport.OrderByDescending(pi => pi.Date));
         }
 
     }

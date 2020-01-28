@@ -37,7 +37,7 @@ namespace store_management.Features.Imports
             public async Task<ImportsEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var queryable = _context.Transaction.Where(t => t.Type.Equals(TransactionType.IMPORT))
-                    .Include(t => t.SaleUnit);
+                    .Include(t => t.ProductImport);
 
                 if (request.Filter != null)
                 {

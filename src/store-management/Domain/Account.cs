@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace store_management.Domain
@@ -16,9 +17,11 @@ namespace store_management.Domain
         public string Username { get; set; }
         public string Password { get; set; }
         public string Salt { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Invoice> Invoice { get; set; }
+        [JsonIgnore]
         public virtual ICollection<OperationHistory> OperationHistory { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Transaction> Transaction { get; set; }
     }
 }

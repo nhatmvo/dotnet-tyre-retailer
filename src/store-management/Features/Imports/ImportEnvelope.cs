@@ -8,7 +8,7 @@ namespace store_management.Features.Imports
 {
     public class ImportEnvelope
     {
-        public List<ImportUnit> ImportUnits { get; set; }
+        public List<ProductImport> ProductImports { get; set; }
     }
 
     public class ImportsEnvelope

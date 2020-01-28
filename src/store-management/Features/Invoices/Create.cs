@@ -63,16 +63,8 @@ namespace store_management.Features.Invoices
 
                 foreach (var item in request.InvoiceLinesData)
                 {
-                    var currentUnit = await _context.SaleUnit.FirstOrDefaultAsync(su => su.Id.Equals(item.SoldUnitId));
-                    var product = (from p in _context.Product
-                                   join pf in _context.PriceFluctuation on p.Id equals pf.ProductId
-                                   join s in _context.SaleUnit on pf.Id equals s.PriceFluctuationId
-                                   where s.Id == item.SoldUnitId
-                                   select new
-                                   {
-                                       ProductName = p.Name,
-                                       ProductType = p.Type
-                                   }).FirstOrDefault();
+                    var currentUnit = await _context.ProductSale.Include(ps => ps.Product)
+                        .FirstOrDefaultAsync(su => su.Id.Equals(item.SoldUnitId));
 
                     var exportPrice = item.SoldPrice ?? currentUnit.SalePrice;
                     var invoiceLine = new InvoiceLine()

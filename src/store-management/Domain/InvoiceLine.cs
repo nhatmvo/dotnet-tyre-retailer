@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -10,7 +12,9 @@ namespace store_management.Domain
         public int? Quantity { get; set; }
         public decimal? Total { get; set; }
         public string InvoiceId { get; set; }
-
+        [JsonIgnore]
         public virtual Invoice Invoice { get; set; }
+        [NotMapped]
+        public string ProductName { get; set; }
     }
 }

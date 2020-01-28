@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-
 namespace store_management.Domain
 {
     public partial class Transaction
     {
         public Transaction()
         {
-            ImportUnit = new HashSet<ImportUnit>();
-            SaleUnit = new HashSet<SaleUnit>();
+            ProductImport = new HashSet<ProductImport>();
+            ProductSale = new HashSet<ProductSale>();
         }
 
         public string Id { get; set; }
@@ -16,9 +16,11 @@ namespace store_management.Domain
         public string AccountId { get; set; }
         public string Type { get; set; }
         public bool? Billing { get; set; }
-
+        [JsonIgnore]
         public virtual Account Account { get; set; }
-        public virtual ICollection<ImportUnit> ImportUnit { get; set; }
-        public virtual ICollection<SaleUnit> SaleUnit { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<ProductImport> ProductImport { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<ProductSale> ProductSale { get; set; }
     }
 }
