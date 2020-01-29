@@ -20,6 +20,16 @@ namespace store_management.Features.Imports
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Tạo mới 1 giá trị nhập hàng của sản phẩm
+        /// </summary>
+        /// <param name="command">
+        ///     Name: tên của sản phẩm
+        ///     Type: Loại của sản phẩm (Lốp xe, vành, yếm, ...)
+        ///     Brand: Thương hiệu của sản phẩm
+        ///     Pattern: 
+        /// </param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ImportEnvelope> Create(Create.Command command)
         {

@@ -22,6 +22,11 @@ namespace store_management.Features.Customers
             _currentUserAccessor = currentUserAccessor;
         }
 
+        /// <summary>
+        /// Lấy thông tin của khách hàng dựa vào id có từ trước
+        /// </summary>
+        /// <param name="id">Id của khách hàng</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<CustomerEnvelope> Get([FromQuery] string id)
         {
