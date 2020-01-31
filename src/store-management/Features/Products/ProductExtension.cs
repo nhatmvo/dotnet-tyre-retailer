@@ -11,7 +11,7 @@ namespace store_management.Features.Products
     {
         public static IQueryable<Product> GetAllData(this DbSet<Product> products)
         {
-            return products.Include(p => p.ProductImport.OrderByDescending(pi => pi.Date));
+            return products.Include(p => p.ProductImport);
         }
 
     }
