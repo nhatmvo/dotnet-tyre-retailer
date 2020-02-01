@@ -116,8 +116,9 @@ namespace store_management.Features.Imports
                             ProductId = productId,
                             Date = DateTime.Now,
                             ImportQuantity = item.ImportAmount,
-                            RemainQuantity = product != null ? product.TotalQuantity +  item.ImportAmount: item.ImportAmount,
-                            TransactionId = transactionId
+                            RemainQuantity = item.ImportAmount,
+                            TransactionId = transactionId,
+                            ProductTotalQuantity = product != null ? product.TotalQuantity + item.ImportAmount : item.ImportAmount
                         };
                         productImports.Add(productImport);
 

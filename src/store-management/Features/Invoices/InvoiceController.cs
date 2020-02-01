@@ -38,5 +38,6 @@ namespace store_management.Features.Invoices
         {
             return await _mediator.Send(query);
         }
+
     }
 }

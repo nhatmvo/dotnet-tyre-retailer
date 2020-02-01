@@ -101,6 +101,30 @@ namespace store_management.Domain
                     .HasCollation("utf8mb4_0900_ai_ci");
             });
 
+            modelBuilder.Entity<ProductExport>(entity =>
+            {
+                entity.ToTable("PRODUCT_EXPORT");
+
+                entity.HasIndex(e => e.ProductId)
+                    .HasName("FK_NBP_PRODUCT");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.NotBillRemainQuantity)
+                    .HasColumnName("NOT_BILL_REMAIN_QUANTITY")
+                    .HasColumnType("int(11)");
+
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("PRODUCT_ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+            });
+
             modelBuilder.Entity<Invoice>(entity =>
             {
                 entity.ToTable("INVOICE");

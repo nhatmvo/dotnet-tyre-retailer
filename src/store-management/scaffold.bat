@@ -1,1 +1,1 @@
-dotnet ef dbcontext scaffold "Server=localhost;Port=32769;Database=TYRE_STORE_MS_DEV;User=root;Password=nhat1997;TreatTinyAsBoolean=true;" "Pomelo.EntityFrameworkCore.MySql" -c StoreContext -o "Domain" -f
+dotnet ef dbcontext scaffold "Server=localhost;Port=32769;Database=TYRE_STORE_MS_DEV;User=root;Password=nhat1997;TreatTinyAsBoolean=true;" "Pomelo.EntityFrameworkCore.MySql" -c StoreContext -o "Domain" -t PRODUCT_EXPORT -f
