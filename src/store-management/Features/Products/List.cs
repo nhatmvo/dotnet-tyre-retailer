@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using store_management.Domain;
 using store_management.Infrastructure;
 using System;
@@ -23,7 +24,6 @@ namespace store_management.Features.Products
             {
                 Filter = filter;
             }
-
             public ProductsFilter Filter { get; set; }
         }
 
@@ -86,6 +86,7 @@ namespace store_management.Features.Products
                     AvailableFilter = GetAvailableFilter(request.Filter)
                 };
             }
+
 
             private FilterEnvelope GetAvailableFilter(ProductsFilter pFilter)
             {

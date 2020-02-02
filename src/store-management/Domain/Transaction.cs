@@ -18,9 +18,7 @@ namespace store_management.Domain
         public bool? Billing { get; set; }
         [JsonIgnore]
         public virtual Account Account { get; set; }
-        [JsonIgnore]
         public virtual ICollection<ProductImport> ProductImport { get; set; }
-        [JsonIgnore]
         public virtual ICollection<ProductSale> ProductSale { get; set; }
     }
 }

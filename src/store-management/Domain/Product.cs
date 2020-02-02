@@ -26,6 +26,9 @@ namespace store_management.Domain
         public string CreatedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<InvoiceLine> InvoiceLine { get; set; }
         [JsonIgnore]
         public virtual ICollection<ProductImport> ProductImport { get; set; }
         [JsonIgnore]

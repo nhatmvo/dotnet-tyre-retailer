@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -19,6 +20,8 @@ namespace store_management.Domain
         public decimal? CurrentImportPrice { get; set; }
         public int? ImportQuantity { get; set; }
         public int? RemainQuantity { get; set; }
+        [NotMapped]
+        public int ProductTotalQuantity { get; set; }
         [JsonIgnore]
         public virtual Product Product { get; set; }
         [JsonIgnore]

@@ -19,6 +19,11 @@ namespace store_management.Features.Invoices
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Xuất hóa đơn dựa vào mã sản phẩm (số lượng xuất hóa đơn nhỏ hơn số lượng chưa xuát hóa đơn)
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<InvoiceEnvelope> Create(Create.Command command)
         {
@@ -38,5 +43,6 @@ namespace store_management.Features.Invoices
         {
             return await _mediator.Send(query);
         }
+
     }
 }

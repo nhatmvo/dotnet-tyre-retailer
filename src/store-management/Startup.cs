@@ -43,8 +43,6 @@ namespace store_management
             var connectionString = Configuration.GetConnectionString("DbConnection") ?? DEFAULT_CONNECTION_STRING;
             var databaseProvider = Configuration.GetConnectionString("DbProviders") ?? DEFAULT_DATABASE_PROVIDER;
 
-            
-
             services.AddDbContext<StoreContext>(options =>
             {
                 if (databaseProvider.Trim().ToLower().Equals("mysql"))
@@ -58,7 +56,6 @@ namespace store_management
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
                 // swagger use class name as SchemaId => specify fullname (including namesapce to generate unique SchemaId)
                 c.CustomSchemaIds(i => i.FullName);
-
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);

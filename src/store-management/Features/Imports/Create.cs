@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using static store_management.Features.Imports.Create;
 
 namespace store_management.Features.Imports
 {
@@ -72,6 +73,8 @@ namespace store_management.Features.Imports
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
+                    request.ImportsData = HandleDuplicateObjRequest(request.ImportsData);
+
                     string transactionId = Guid.NewGuid().ToString();
 
                     var productsInsert = new List<Product>();
@@ -114,7 +117,8 @@ namespace store_management.Features.Imports
                             Date = DateTime.Now,
                             ImportQuantity = item.ImportAmount,
                             RemainQuantity = item.ImportAmount,
-                            TransactionId = transactionId
+                            TransactionId = transactionId,
+                            ProductTotalQuantity = product != null ? product.TotalQuantity + item.ImportAmount : item.ImportAmount
                         };
                         productImports.Add(productImport);
 
@@ -170,6 +174,25 @@ namespace store_management.Features.Imports
                     .FirstOrDefaultAsync(p => p.Pattern.Equals(pattern) && p.Type.Equals(type)
                         && p.Brand.Equals(brand) && p.Size.Equals(size));
                 return product;
+            }
+
+            private List<ImportData> HandleDuplicateObjRequest(List<ImportData> importsData)
+            {
+                var handledResult = new List<ImportData>();
+                foreach (var item in importsData)
+                {
+                    var existedItem = handledResult.Where(a => a.Brand.Equals(item.Brand) && a.Type.Equals(item.Type) && a.Pattern.Equals(item.Pattern) && a.Size.Equals(item.Size)).FirstOrDefault();
+                    if (existedItem != null)
+                    {
+                        if (existedItem.ImportPrice != item.ImportPrice) throw new RestException(HttpStatusCode.BadRequest, new { });
+                        existedItem.ImportAmount += item.ImportAmount;
+                    } 
+                    else
+                    {
+                        handledResult.Add(item);
+                    }
+                }
+                return handledResult;
             }
 
 
