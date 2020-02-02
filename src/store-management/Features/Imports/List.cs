@@ -14,6 +14,7 @@ namespace store_management.Features.Imports
     {
         public class TransactionFilter
         {
+            public string ProductId { get; set; }
             public DateTime? FromDate { get; set; }
             public DateTime? ToDate { get; set; }
             public int? Limit { get; set; }
@@ -45,6 +46,10 @@ namespace store_management.Features.Imports
                         queryable.Where(t => t.Date >= request.Filter.FromDate);
                     if (request.Filter.ToDate.HasValue)
                         queryable.Where(t => t.Date <= request.Filter.ToDate);
+                    if (!string.IsNullOrEmpty(request.Filter.ProductId))
+                    {
+
+                    }
                     var transactions = await queryable
                         .Skip(request.Filter.Offset ?? 0)
                         .Take(request.Filter.Limit ?? 10)

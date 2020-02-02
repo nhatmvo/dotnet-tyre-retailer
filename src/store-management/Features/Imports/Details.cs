@@ -45,12 +45,11 @@ namespace store_management.Features.Imports
                 var validator = (new QueryValidator()).Validate(request);
                 if (validator.IsValid)
                 {
-                    var transaction = await _context.Transaction
-                        .Include(t => t.ProductImport)
-                        .FirstOrDefaultAsync(t => t.Id.Equals(request.Id), cancellationToken);
+                    var productImports = _context.ProductImport
+                        .Where(t => t.Product.Id.Equals(request.Id));
                     return new ImportEnvelope
                     {
-                        ProductImports = transaction.ProductImport.ToList()
+                        ProductImports = await productImports.ToListAsync(cancellationToken)
                     };
                 }
                 else
