@@ -25,6 +25,7 @@ namespace store_management.Domain
         public virtual DbSet<ProductSale> ProductSale { get; set; }
         public virtual DbSet<SaleImportReport> SaleImportReport { get; set; }
         public virtual DbSet<Transaction> Transaction { get; set; }
+        public virtual DbSet<ProductExport> ProductExport { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -205,6 +206,12 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("PRODUCT_ID")
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci"); ;
+
                 entity.Property(e => e.Quantity)
                     .HasColumnName("QUANTITY")
                     .HasColumnType("int(11)");
@@ -217,6 +224,13 @@ namespace store_management.Domain
                     .WithMany(p => p.InvoiceLine)
                     .HasForeignKey(d => d.InvoiceId)
                     .HasConstraintName("FK_INVOICE_LINE_INVOICE");
+                
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.InvoiceLine)
+                    .HasForeignKey(d => d.ProductId)
+                    .HasConstraintName("FK_INVOICE_LINE_PRODUCT");
+                
+                
             });
 
             modelBuilder.Entity<OperationHistory>(entity =>

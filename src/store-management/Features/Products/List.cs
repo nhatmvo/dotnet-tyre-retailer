@@ -20,7 +20,7 @@ namespace store_management.Features.Products
 
             }
 
-            public Query(ProductsFilter filter, bool getNoInvoice = false)
+            public Query(ProductsFilter filter)
             {
                 Filter = filter;
             }
