@@ -24,6 +24,7 @@ namespace store_management.Infrastructure.Common
     {
         public static string IMPORT = "I";
         public static string SOLD = "S";
+        public static string EXPORT = "E";
     }
 
     
