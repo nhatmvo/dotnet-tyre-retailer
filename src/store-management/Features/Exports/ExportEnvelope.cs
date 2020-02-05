@@ -9,11 +9,13 @@ namespace store_management.Features.Exports
 {
     public class ExportEnvelope
     {
-        public string ProductName { get; set; }
-        public string ProductType { get; set; }
-        public string ProductId { get; set; }
-        public string ProductPattern { get; set; }
-        public string ProductSize { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Id { get; set; }
+        public string Pattern { get; set; }
+        public string Size { get; set; }
+        public string Brand { get; set; }
+        public decimal? RefPrice { get; set; }
         public int NoBillRemainQuantity { get; set; }
     }
 

@@ -115,7 +115,7 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.NotBillRemainQuantity)
+                entity.Property(e => e.NoBillRemainQuantity)
                     .HasColumnName("NOT_BILL_REMAIN_QUANTITY")
                     .HasColumnType("int(11)");
 
@@ -212,7 +212,7 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci"); ;
 
-                entity.Property(e => e.Quantity)
+                entity.Property(e => e.ExportAmount)
                     .HasColumnName("QUANTITY")
                     .HasColumnType("int(11)");
 
@@ -383,7 +383,7 @@ namespace store_management.Domain
                     .HasColumnName("IMPORT_PRICE")
                     .HasColumnType("decimal(13,4)");
 
-                entity.Property(e => e.ImportQuantity)
+                entity.Property(e => e.ImportAmount)
                     .HasColumnName("IMPORT_QUANTITY")
                     .HasColumnType("int(11)");
 
@@ -438,7 +438,7 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Quantity)
+                entity.Property(e => e.SaleAmount)
                     .HasColumnName("QUANTITY")
                     .HasColumnType("int(11)");
 
@@ -549,6 +549,10 @@ namespace store_management.Domain
                     .WithMany(p => p.Transaction)
                     .HasForeignKey(d => d.AccountId)
                     .HasConstraintName("FK_TRANSACTION_ACCOUNT");
+
+                entity.Property(e => e.Note)
+                    .HasColumnName("NOTE")
+                    .HasColumnType("varchar(5000)");
             });
 
             OnModelCreatingPartial(modelBuilder);

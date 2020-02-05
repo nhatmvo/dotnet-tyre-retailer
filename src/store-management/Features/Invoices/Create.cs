@@ -17,8 +17,8 @@ namespace store_management.Features.Invoices
         public class InvoiceData
         {
             public string ProductId { get; set; }
-            public int Quantity { get; set; }
-            public decimal? SoldPrice { get; set; }
+            public int ExportAmount { get; set; }
+            public decimal? ExportPrice { get; set; }
         }
 
         public class InvoiceDataValidator : AbstractValidator<InvoiceData>
@@ -73,17 +73,17 @@ namespace store_management.Features.Invoices
 
                     if (notBillingProduct == null) 
                         throw new RestException(HttpStatusCode.BadRequest, new { });
-                    if (notBillingProduct.NotBillRemainQuantity < item.Quantity)
+                    if (notBillingProduct.NoBillRemainQuantity < item.ExportAmount)
                         throw new RestException(HttpStatusCode.BadRequest, new { });
 
-                    var exportPrice = item.SoldPrice ?? notBillingProduct.Product.RefPrice;
+                    var exportPrice = item.ExportPrice ?? notBillingProduct.Product.RefPrice;
                     var invoiceLine = new InvoiceLine()
                     {
                         ExportPrice = exportPrice,
                         Id = Guid.NewGuid().ToString(),
                         InvoiceId = invoice.Id,
-                        Quantity = item.Quantity,
-                        Total = exportPrice * item.Quantity,
+                        ExportAmount = item.ExportAmount,
+                        Total = exportPrice * item.ExportAmount,
                         ProductId = item.ProductId
                     };
                     lines.Add(invoiceLine);

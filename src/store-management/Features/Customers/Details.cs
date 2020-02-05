@@ -16,12 +16,12 @@ namespace store_management.Features.Customers
     {
         public class Query : IRequest<CustomerEnvelope>
         {
-            public Query(string id)
+            public Query(string taxNumber)
             {
-                Id = id;
+                TaxNumber = taxNumber;
                 
             }
-            public string Id { get; set; }
+            public string TaxNumber { get; set; }
 
         }
 
@@ -29,7 +29,7 @@ namespace store_management.Features.Customers
         {
             public QueryValidator()
             {
-                RuleFor(x => x.Id).NotNull().NotEmpty();
+                RuleFor(x => x.TaxNumber).NotNull().NotEmpty();
             }
         }
 
@@ -45,7 +45,7 @@ namespace store_management.Features.Customers
             public async Task<CustomerEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var customer = await _context.Customer
-                    .FirstOrDefaultAsync(c => c.Id.Equals(request.Id), cancellationToken);
+                    .FirstOrDefaultAsync(c => c.TaxCode.Equals(request.TaxNumber), cancellationToken);
                 
                 if (customer == null)
                 {

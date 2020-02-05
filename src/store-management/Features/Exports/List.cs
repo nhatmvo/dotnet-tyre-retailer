@@ -45,12 +45,14 @@ namespace store_management.Features.Exports
                 {
                     queryable = queryable.Skip(0).Take(10);
                     var invoiceProducts = await queryable.Select(q => new ExportEnvelope {
-                        NoBillRemainQuantity = q.NotBillRemainQuantity ?? 0,
-                        ProductId = q.ProductId,
-                        ProductName = q.Product.Name,
-                        ProductPattern = q.Product.Pattern,
-                        ProductSize = q.Product.Size,
-                        ProductType = q.Product.Type
+                        NoBillRemainQuantity = q.NoBillRemainQuantity ?? 0,
+                        Id = q.ProductId,
+                        Name = q.Product.Name,
+                        Pattern = q.Product.Pattern,
+                        Size = q.Product.Size,
+                        Type = q.Product.Type,
+                        Brand = q.Product.Brand,
+                        RefPrice = q.Product.RefPrice
                     }).ToListAsync();
                     return new ExportsEnvelope
                     {
@@ -81,12 +83,14 @@ namespace store_management.Features.Exports
                     .AsNoTracking();
 
                 var result = await queryable.Select(q => new ExportEnvelope {
-                    NoBillRemainQuantity = q.NotBillRemainQuantity ?? 0,
-                    ProductId = q.ProductId,
-                    ProductName = q.Product.Name,
-                    ProductPattern = q.Product.Pattern,
-                    ProductSize = q.Product.Size,
-                    ProductType = q.Product.Type
+                    NoBillRemainQuantity = q.NoBillRemainQuantity ?? 0,
+                    Id = q.ProductId,
+                    Name = q.Product.Name,
+                    Pattern = q.Product.Pattern,
+                    Size = q.Product.Size,
+                    Type = q.Product.Type,
+                    Brand = q.Product.Brand,
+                    RefPrice = q.Product.RefPrice
                 }).ToListAsync(cancellationToken);
 
                 return new ExportsEnvelope

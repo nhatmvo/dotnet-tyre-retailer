@@ -18,7 +18,7 @@ namespace store_management.Domain
         public DateTime? Date { get; set; }
         public decimal ImportPrice { get; set; }
         public decimal? CurrentImportPrice { get; set; }
-        public int? ImportQuantity { get; set; }
+        public int? ImportAmount { get; set; }
         public int? RemainQuantity { get; set; }
         [NotMapped]
         public int ProductTotalQuantity { get; set; }

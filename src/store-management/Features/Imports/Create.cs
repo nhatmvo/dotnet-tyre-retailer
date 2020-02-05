@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+﻿    using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
@@ -45,6 +45,7 @@ namespace store_management.Features.Imports
         public class Command : IRequest<ImportEnvelope>
         {
             public List<ImportData> ImportsData { get; set; }
+            public string Note { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -87,7 +88,8 @@ namespace store_management.Features.Imports
                         Id = transactionId,
                         Type = TransactionType.IMPORT,
                         Billing = false,
-                        Date = _now
+                        Date = _now,
+                        Note = request.Note
                     };
                     await _context.Transaction.AddAsync(transaction);
 
@@ -115,7 +117,7 @@ namespace store_management.Features.Imports
                             ImportPrice = item.ImportPrice,
                             ProductId = productId,
                             Date = DateTime.Now,
-                            ImportQuantity = item.ImportAmount,
+                            ImportAmount = item.ImportAmount,
                             RemainQuantity = item.ImportAmount,
                             TransactionId = transactionId,
                             ProductTotalQuantity = product != null ? product.TotalQuantity + item.ImportAmount : item.ImportAmount

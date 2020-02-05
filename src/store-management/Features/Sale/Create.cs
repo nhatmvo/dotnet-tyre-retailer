@@ -99,7 +99,7 @@ namespace store_management.Features.Sale
                                 {
                                     Id = pdSaleId,
                                     ProductId = productToSell.Id,
-                                    Quantity = item.SaleAmount,
+                                    SaleAmount = item.SaleAmount,
                                     SalePrice = item.SalePrice,
                                     TransactionId = transactionId
                                 });

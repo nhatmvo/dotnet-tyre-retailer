@@ -16,7 +16,7 @@ namespace store_management.Domain
         public string WarrantyCode { get; set; }
         public string Type { get; set; }
         public decimal? SalePrice { get; set; }
-        public int? Quantity { get; set; }
+        public int? SaleAmount { get; set; }
         public string TransactionId { get; set; }
         [JsonIgnore]
         public virtual Product Product { get; set; }

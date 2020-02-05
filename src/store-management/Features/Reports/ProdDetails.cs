@@ -88,7 +88,7 @@ namespace store_management.Features.Reports
                     { 
                         Action = TransactionType.IMPORT,
                         Price = p.ImportPrice,
-                        Quantity = p.ImportQuantity.Value,
+                        Quantity = p.ImportAmount.Value,
                         Timestamp = _now
                     });
 
@@ -96,7 +96,7 @@ namespace store_management.Features.Reports
                     {
                         Action = TransactionType.SOLD,
                         Price = p.SalePrice.Value,
-                        Quantity = p.Quantity.Value,
+                        Quantity = p.SaleAmount.Value,
                         Timestamp = _now
                     });
 
@@ -104,15 +104,13 @@ namespace store_management.Features.Reports
                     {
                         Action = TransactionType.EXPORT,
                         Price = p.ExportPrice.Value,
-                        Quantity = p.Quantity.Value,
+                        Quantity = p.ExportAmount.Value,
                         Timestamp = _now
                     });
                     return new ReportsEnvelope(importsEnvelope.Concat(salesEnvelope).Concat(exportEnvelope).ToList());
                 }
                 else
                     throw new RestException(HttpStatusCode.BadRequest, new { });
-
-                throw new NotImplementedException();
             }
         }
 

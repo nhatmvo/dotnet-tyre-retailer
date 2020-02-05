@@ -16,6 +16,7 @@ namespace store_management.Domain
         public string AccountId { get; set; }
         public string Type { get; set; }
         public bool? Billing { get; set; }
+        public string Note { get; set; }
         [JsonIgnore]
         public virtual Account Account { get; set; }
         public virtual ICollection<ProductImport> ProductImport { get; set; }
