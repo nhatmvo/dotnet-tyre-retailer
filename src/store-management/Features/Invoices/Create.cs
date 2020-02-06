@@ -19,6 +19,7 @@ namespace store_management.Features.Invoices
             public string ProductId { get; set; }
             public int ExportAmount { get; set; }
             public decimal? ExportPrice { get; set; }
+
         }
 
         public class InvoiceDataValidator : AbstractValidator<InvoiceData>
@@ -32,6 +33,10 @@ namespace store_management.Features.Invoices
         public class Command : IRequest<InvoiceEnvelope>
         {
             public List<InvoiceData> InvoiceLinesData { get; set; }
+            public string CustomerTaxCode { get; set; }
+            public string CustomerBankAccountNo { get; set; }
+            public string CustomerName { get; set; }
+            public string CustomerAddress { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -56,11 +61,23 @@ namespace store_management.Features.Invoices
             {
                 var lines = new List<InvoiceLine>();
 
+                var customer = new Customer()
+                {
+                    Address = request.CustomerAddress,
+                    BankAccountNumber = request.CustomerBankAccountNo,
+                    FullName = request.CustomerName,
+                    Id = Guid.NewGuid().ToString(),
+                    TaxCode = request.CustomerTaxCode
+                };
+
+
+
                 var invoice = new Invoice()
                 {
                     Id = Guid.NewGuid().ToString(),
                     ExportDate = DateTime.Now,
                     InvoiceNo = (new Random()).Next(10000000, 99999999),
+                    CustomerId = customer.Id
                 };
                 
 
@@ -91,6 +108,7 @@ namespace store_management.Features.Invoices
                 }
 
                 invoice.Total = lines.Sum(l => l.Total);
+                await _context.Customer.AddAsync(customer);
                 await _context.Invoice.AddAsync(invoice);
                 await _context.InvoiceLine.AddRangeAsync(lines);
 
