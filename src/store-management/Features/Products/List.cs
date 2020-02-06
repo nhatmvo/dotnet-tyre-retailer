@@ -108,13 +108,13 @@ namespace store_management.Features.Products
                 else
                 {
                     if (!string.IsNullOrEmpty(pFilter.Type)) 
-                        queryable = queryable.Where(p => p.Type.Equals(pFilter.Type));
+                        queryable = queryable.Where(p => pFilter.Type.ToLower().Contains(p.Type.ToLower()));
                     if (!string.IsNullOrEmpty(pFilter.Brand))
-                        queryable = queryable.Where(p => p.Brand.Equals(pFilter.Brand));
+                        queryable = queryable.Where(p => pFilter.Brand.ToLower().Contains(p.Brand.ToLower()));
                     if (!string.IsNullOrEmpty(pFilter.Pattern))
-                        queryable = queryable.Where(p => p.Pattern.Equals(pFilter.Pattern));
+                        queryable = queryable.Where(p => pFilter.Pattern.ToLower().Contains(p.Pattern.ToLower()));
                     if (!string.IsNullOrEmpty(pFilter.Size))
-                        queryable = queryable.Where(p => p.Size.Equals(pFilter.Size));
+                        queryable = queryable.Where(p => pFilter.Size.ToLower().Contains(p.Size.ToLower()));
 
                     return new FilterEnvelope
                     {
