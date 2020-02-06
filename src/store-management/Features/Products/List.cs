@@ -55,21 +55,21 @@ namespace store_management.Features.Products
 
                 if (!string.IsNullOrEmpty(request.Filter.Pattern))
                 {
-                    queryable = queryable.Where(q => q.Pattern.ToLower().Contains(request.Filter.Pattern.ToLower()));
+                    queryable = queryable.Where(q => separateFilterOptions(request.Filter.Pattern.ToLower()).Contains(q.Pattern.ToLower()));
                 }
 
                 if (!string.IsNullOrEmpty(request.Filter.Brand))
                 {
-                    queryable = queryable.Where(q => q.Brand.ToLower().Contains(request.Filter.Brand.ToLower()));
+                    queryable = queryable.Where(q => separateFilterOptions(request.Filter.Brand.ToLower()).Contains(q.Pattern.ToLower()));
                 }
 
                 if (!string.IsNullOrEmpty(request.Filter.Type))
                 {
-                    queryable = queryable.Where(q => q.Type.ToLower().Equals(request.Filter.Type.ToLower()));
+                    queryable = queryable.Where(q => separateFilterOptions(request.Filter.Type.ToLower()).Contains(q.Pattern.ToLower()));
                 }
                 if (!string.IsNullOrEmpty(request.Filter.Size))
                 {
-                    queryable = queryable.Where(q => q.Size.ToLower().Equals(request.Filter.Size.ToLower()));
+                    queryable = queryable.Where(q => separateFilterOptions(request.Filter.Size.ToLower()).Contains(q.Pattern.ToLower()));
                 }
 
                 
@@ -87,6 +87,10 @@ namespace store_management.Features.Products
                 };
             }
 
+            private List<String> separateFilterOptions(String options)
+            {
+                return options.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+            }
 
             private FilterEnvelope GetAvailableFilter(ProductsFilter pFilter)
             {
