@@ -89,7 +89,7 @@ namespace store_management.Features.Reports
                         Action = TransactionType.IMPORT,
                         Price = p.ImportPrice,
                         Quantity = p.ImportAmount.Value,
-                        Timestamp = _now
+                        Timestamp = p.Date
                     });
 
                     var salesEnvelope = productReports.ProductSale.Select(p => new ReportEnvelope
@@ -97,7 +97,7 @@ namespace store_management.Features.Reports
                         Action = TransactionType.SOLD,
                         Price = p.SalePrice.Value,
                         Quantity = p.SaleAmount.Value,
-                        Timestamp = _now
+                        Timestamp = p.Transaction.Date
                     });
 
                     var exportEnvelope = productReports.InvoiceLine.Select(p => new ReportEnvelope
@@ -105,7 +105,7 @@ namespace store_management.Features.Reports
                         Action = TransactionType.EXPORT,
                         Price = p.ExportPrice.Value,
                         Quantity = p.ExportAmount.Value,
-                        Timestamp = _now
+                        Timestamp = p.Invoice.ExportDate
                     });
                     return new ReportsEnvelope(importsEnvelope.Concat(salesEnvelope).Concat(exportEnvelope).ToList());
                 }
