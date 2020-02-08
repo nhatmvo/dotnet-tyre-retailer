@@ -16,7 +16,7 @@ namespace store_management.Features.Invoices
 	{
 		public class InvoiceData
 		{
-			public string ProductId { get; set; }
+			public string id { get; set; }
 			public int ExportAmount { get; set; }
 			public decimal? ExportPrice { get; set; }
 		}
@@ -33,7 +33,7 @@ namespace store_management.Features.Invoices
 		{
 			public InvoiceDataValidator()
 			{
-				RuleFor(x => x.ProductId).NotNull().NotEmpty();
+				RuleFor(x => x.id).NotNull().NotEmpty();
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace store_management.Features.Invoices
 
 					var notBillingProduct = await _context.ProductExport
 						.Include(pe => pe.Product)
-						.FirstOrDefaultAsync(pe => pe.ProductId.Equals(item.ProductId));
+						.FirstOrDefaultAsync(pe => pe.ProductId.Equals(item.id));
 
 					if (notBillingProduct == null)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
@@ -107,7 +107,7 @@ namespace store_management.Features.Invoices
 						InvoiceId = invoice.Id,
 						ExportAmount = item.ExportAmount,
 						Total = exportPrice * item.ExportAmount,
-						ProductId = item.ProductId
+						ProductId = item.id
 					};
 					lines.Add(invoiceLine);
 
