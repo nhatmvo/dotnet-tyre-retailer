@@ -23,14 +23,14 @@ namespace store_management.Features.Customers
         }
 
         /// <summary>
-        /// Lấy thông tin của khách hàng dựa vào id có từ trước
+        /// Lấy thông tin của khách hàng dựa vào taxCode có từ trước
         /// </summary>
-        /// <param name="id">Id của khách hàng</param>
+        /// <param name="taxCode">taxCode của khách hàng</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<CustomerEnvelope> Get([FromQuery] string id)
+        public async Task<CustomerEnvelope> Get([FromQuery] string taxCode)
         {
-            return await _mediator.Send(new Details.Query(id));
+            return await _mediator.Send(new Details.Query(taxCode));
         }
 
         [HttpPost]
