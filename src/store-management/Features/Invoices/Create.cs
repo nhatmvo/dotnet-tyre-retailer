@@ -16,7 +16,7 @@ namespace store_management.Features.Invoices
 	{
 		public class InvoiceData
 		{
-			public string id { get; set; }
+			public string Id { get; set; }
 			public int ExportAmount { get; set; }
 			public decimal? ExportPrice { get; set; }
 		}
@@ -33,14 +33,14 @@ namespace store_management.Features.Invoices
 		{
 			public InvoiceDataValidator()
 			{
-				RuleFor(x => x.id).NotNull().NotEmpty();
+				RuleFor(x => x.Id).NotNull().NotEmpty();
 			}
 		}
 
 		public class Command : IRequest<InvoiceEnvelope>
 		{
 			public List<InvoiceData> InvoiceLinesData { get; set; }
-			public CustomerData customerData { get; set; }
+			public CustomerData CustomerData { get; set; }
 		}
 
 		public class CommandValidator : AbstractValidator<Command>
@@ -65,15 +65,15 @@ namespace store_management.Features.Invoices
 			{
 				var lines = new List<InvoiceLine>();
 
-				var existedCustomer = await this.HandleExistedCustomer(request.customerData.TaxCode);
+				var existedCustomer = await this.HandleExistedCustomer(request.CustomerData.TaxCode);
 
 				var customer = existedCustomer ?? new Customer()
 				{
-					Address = request.customerData.Address,
-					BankAccountNumber = request.customerData.BankAccountNumber,
-					FullName = request.customerData.FullName,
+					Address = request.CustomerData.Address,
+					BankAccountNumber = request.CustomerData.BankAccountNumber,
+					FullName = request.CustomerData.FullName,
 					Id = Guid.NewGuid().ToString(),
-					TaxCode = request.customerData.TaxCode
+					TaxCode = request.CustomerData.TaxCode
 				};
 
 
@@ -92,7 +92,7 @@ namespace store_management.Features.Invoices
 
 					var notBillingProduct = await _context.ProductExport
 						.Include(pe => pe.Product)
-						.FirstOrDefaultAsync(pe => pe.ProductId.Equals(item.id));
+						.FirstOrDefaultAsync(pe => pe.ProductId.Equals(item.Id));
 
 					if (notBillingProduct == null)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
@@ -107,7 +107,7 @@ namespace store_management.Features.Invoices
 						InvoiceId = invoice.Id,
 						ExportAmount = item.ExportAmount,
 						Total = exportPrice * item.ExportAmount,
-						ProductId = item.id
+						ProductId = item.Id
 					};
 					lines.Add(invoiceLine);
 
@@ -123,10 +123,10 @@ namespace store_management.Features.Invoices
 				return new InvoiceEnvelope(invoice);
 			}
 
-			private async Task<Customer> HandleExistedCustomer(String taxCode)
+			private async Task<Customer> HandleExistedCustomer(string taxCode)
 			{
 				var customer = await _context.Customer.AsNoTracking()
-				   .FirstOrDefaultAsync(c => c.BankAccountNumber.ToLower().Equals(taxCode));
+				   .FirstOrDefaultAsync(c => c.TaxCode.ToLower().Equals(taxCode));
 				return customer;
 			}
 		}

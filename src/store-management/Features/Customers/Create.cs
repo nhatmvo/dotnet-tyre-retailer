@@ -1,6 +1,9 @@
 ﻿using FluentValidation;
+using System.Net;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
+using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +59,10 @@ namespace store_management.Features.Customers
 
             public async Task<CustomerEnvelope> Handle(Command command, CancellationToken cancellationToken)
             {
+
+                var existedCustomer = await _context.Customer.FirstOrDefaultAsync(c => c.TaxCode.Equals(command.Customer.TaxNumber));
+                if (existedCustomer != null)
+                    throw new RestException(HttpStatusCode.BadRequest, new { });
                 var customer = new Customer()
                 {
                     Id = Guid.NewGuid().ToString(),
