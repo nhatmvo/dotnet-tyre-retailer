@@ -48,15 +48,15 @@ namespace store_management.Domain
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Password)
-                    .HasColumnName("PASSWORD")
-                    .HasColumnType("varchar(50)")
+                entity.Property(e => e.Salt)
+                    .HasColumnName("SALT")
+                    .HasColumnType("char(255)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.Salt)
-                    .HasColumnName("SALT")
-                    .HasColumnType("char(32)")
+                entity.Property(e => e.Hash)
+                    .HasColumnName("HASH")
+                    .HasColumnType("char(255)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 

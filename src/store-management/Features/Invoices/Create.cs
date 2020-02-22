@@ -65,7 +65,7 @@ namespace store_management.Features.Invoices
 			{
 				var lines = new List<InvoiceLine>();
 
-				var existedCustomer = await this.HandleExistedCustomer(request.CustomerData.TaxCode);
+				var existedCustomer = await HandleExistedCustomer(request.CustomerData.TaxCode);
 
 				var customer = existedCustomer ?? new Customer()
 				{

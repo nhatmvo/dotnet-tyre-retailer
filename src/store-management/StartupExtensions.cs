@@ -16,7 +16,7 @@ namespace store_management
         {
             services.AddOptions();
 
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("thebrownfoxjumpsoverabigblackcook"));
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("somethinglongerforthisdumbalgorithmisrequired"));
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
             var issuer = "issuer";
             var audience = "audience";
@@ -28,7 +28,7 @@ namespace store_management
                 options.SigningCredentials = signingCredentials;
             });
 
-            var tokenValidationParameters = new TokenValidationParameters()
+            var tokenValidationParameters = new TokenValidationParameters
             {
                 // The signing key must match!
                 ValidateIssuerSigningKey = true,
@@ -44,7 +44,6 @@ namespace store_management
                 // If you want to allow a certain amount of clock drift, set that here:
                 ClockSkew = TimeSpan.Zero
             };
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -64,7 +63,6 @@ namespace store_management
                     };
 
                 });
-
         }
     }
 }

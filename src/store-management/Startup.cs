@@ -53,6 +53,25 @@ namespace store_management
             });
             services.AddControllers();
             services.AddSwaggerGen(c => {
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please insert JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    BearerFormat = "JWT"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {   new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                    },
+                    new string[] {}}
+                });
+
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
                 // swagger use class name as SchemaId => specify fullname (including namesapce to generate unique SchemaId)
                 c.CustomSchemaIds(i => i.FullName);
@@ -73,7 +92,7 @@ namespace store_management
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
-            //services.AddJwt();
+            services.AddJwt();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

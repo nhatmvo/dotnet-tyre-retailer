@@ -67,14 +67,15 @@ namespace store_management.Features.Accounts
                 var salt = Guid.NewGuid().ToByteArray();
                 var account = new Account
                 {
+                    Id = Guid.NewGuid().ToString(),
                     Username = command.AccountData.Username,
-                    Password = _passwordHasher.Hash(command.AccountData.Password, salt).ToString(),
-                    Salt = salt.ToString()
+                    Hash = _passwordHasher.Hash(command.AccountData.Password, salt),
+                    Salt = salt
                 };
 
                 _context.Account.Add(account);
                 await _context.SaveChangesAsync(cancellationToken);
-                //account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
+                account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
                 return new AccountEnvelope(account);
 
             }

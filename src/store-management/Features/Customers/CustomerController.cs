@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Security;
 
 namespace store_management.Features.Customers
 {
@@ -34,12 +36,14 @@ namespace store_management.Features.Customers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<CustomerEnvelope> Create([FromBody] Create.Command command)
         {
             return await _mediator.Send(command);
         }
 
         [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<CustomerEnvelope> Edit(string id, [FromBody] Edit.Command command)
         {
             command.Id = id;
@@ -47,6 +51,7 @@ namespace store_management.Features.Customers
         }
 
         [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task Delete(string id)
         {
             await _mediator.Send(new Delete.Command(id));

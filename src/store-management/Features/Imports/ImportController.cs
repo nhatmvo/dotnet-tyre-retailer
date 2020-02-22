@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using store_management.Features.Imports;
+using store_management.Infrastructure.Security;
 
 namespace store_management.Features.Imports
 {
@@ -31,6 +34,7 @@ namespace store_management.Features.Imports
         /// </param>
         /// <returns></returns>
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<ImportEnvelope> Create(Create.Command command)
         {
             return await _mediator.Send(command);
