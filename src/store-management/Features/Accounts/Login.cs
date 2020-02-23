@@ -70,7 +70,7 @@ namespace store_management.Features.Accounts
 
                 }
 
-                if (account.Hash.Equals(_passwordHasher.Hash(request.Account.Password, account.Salt)))
+                if (!account.Hash.SequenceEqual(_passwordHasher.Hash(request.Account.Password, account.Salt)))
                 {
                     throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Người dùng nhập sai tài khoản / mật khẩu" });
                 }

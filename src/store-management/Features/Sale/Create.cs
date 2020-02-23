@@ -72,11 +72,14 @@ namespace store_management.Features.Sale
                         Date = _now
                     };
 
-                    await _context.AddAsync(transaction, cancellationToken);
+                    await _context.Transaction.AddAsync(transaction, cancellationToken);
+
                     // When a product is sold, 3 tables will be updated:
                     // 1. Create Product Sale record
                     // 2. Create Relationship between Product Sale and Product Import => get the oldest Product Import with remaining quantity higher than 0
-                    // 3. Substract Product Import quantity 
+                    //  2.1. Substract Product Import quantity 
+                    // 3. Add product sale quantity to Product Export for billing later
+
                     foreach (var item in request.SalesData)
                     {
                         var productToSell = await _context.Product
@@ -86,7 +89,7 @@ namespace store_management.Features.Sale
                         if (productToSell != null)
                         {
                             if (productToSell.TotalQuantity < item.SaleAmount) // if sale amount is greater than available quantity a product has
-                                throw new RestException(HttpStatusCode.BadRequest, new { });
+                                throw new RestException(HttpStatusCode.Conflict, new { Error = "Số lượng bán nhiều hơn số lượng sản phẩm có trong kho" });
 
                             // when selling a product, the oldest Product Import with remaining quantity higher than 0 will be substracted
                             var productImports = productToSell.ProductImport.Where(pi => pi.RemainQuantity > 0).OrderBy(pi => pi.Date).ToList();
@@ -116,6 +119,15 @@ namespace store_management.Features.Sale
                                             Quantity = saleAmount
                                         });
                                         productImports[i].RemainQuantity -= saleAmount;
+                                        await _context.ProductExport.AddAsync(new ProductExport
+                                        {
+                                            Id = Guid.NewGuid().ToString(),
+                                            NoBillRemainQuantity = saleAmount,
+                                            ProductImportId = productImports[i].Id
+                                        });
+
+                                        _context.ProductImport.UpdateRange(productImports);
+
                                         break;
                                     }
                                     // if remaining quantity is lower than sale amount => remain quantity is set to 0 and continue loop
@@ -129,7 +141,15 @@ namespace store_management.Features.Sale
                                             Quantity = productImports[i].RemainQuantity.Value
                                         });
                                         productImports[i].RemainQuantity = 0;
+                                        await _context.ProductExport.AddAsync(new ProductExport
+                                        {
+                                            Id = Guid.NewGuid().ToString(),
+                                            NoBillRemainQuantity = saleAmount,
+                                            ProductImportId = productImports[i].Id
+                                        });
+                                        _context.ProductImport.UpdateRange(productImports);
                                     }
+
                                 }
 
                             }
@@ -137,7 +157,7 @@ namespace store_management.Features.Sale
                             {
                                 throw new RestException(HttpStatusCode.Conflict, new { Error = "Số lượng sản phẩm không đủ" });
                             }
-                            _context.ProductImport.UpdateRange(productImports);
+                            // Product Export
 
                         } 
                         else

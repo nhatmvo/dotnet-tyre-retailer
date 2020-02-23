@@ -46,13 +46,13 @@ namespace store_management.Features.Exports
                     queryable = queryable.Skip(0).Take(10);
                     var invoiceProducts = await queryable.Select(q => new ExportEnvelope {
                         NoBillRemainQuantity = q.NoBillRemainQuantity ?? 0,
-                        Id = q.ProductId,
-                        Name = q.Product.Name,
-                        Pattern = q.Product.Pattern,
-                        Size = q.Product.Size,
-                        Type = q.Product.Type,
-                        Brand = q.Product.Brand,
-                        RefPrice = q.Product.RefPrice
+                        Id = q.Id,
+                        Name = q.ProductImport.Product.Name,
+                        Pattern = q.ProductImport.Product.Pattern,
+                        Size = q.ProductImport.Product.Size,
+                        Type = q.ProductImport.Product.Type,
+                        Brand = q.ProductImport.Product.Brand,
+                        RefPrice = q.ProductImport.Product.RefPrice
                     }).ToListAsync();
                     return new ExportsEnvelope
                     {
@@ -62,19 +62,19 @@ namespace store_management.Features.Exports
 
                 if (!string.IsNullOrEmpty(request.Filter.Type))
                 {
-                    queryable = queryable.Where(p => p.Product.Type.Contains(request.Filter.Type));
+                    queryable = queryable.Where(p => p.ProductImport.Product.Type.Contains(request.Filter.Type));
                 }
                 if (!string.IsNullOrEmpty(request.Filter.Brand))
                 {
-                    queryable = queryable.Where(p => p.Product.Brand.Contains(request.Filter.Brand));
+                    queryable = queryable.Where(p => p.ProductImport.Product.Brand.Contains(request.Filter.Brand));
                 }
                 if (!string.IsNullOrEmpty(request.Filter.Size))
                 {
-                    queryable = queryable.Where(p => p.Product.Size.Contains(request.Filter.Size));
+                    queryable = queryable.Where(p => p.ProductImport.Product.Size.Contains(request.Filter.Size));
                 }
                 if (!string.IsNullOrEmpty(request.Filter.Pattern))
                 {
-                    queryable = queryable.Where(p => p.Product.Pattern.Contains(request.Filter.Pattern));
+                    queryable = queryable.Where(p => p.ProductImport.Product.Pattern.Contains(request.Filter.Pattern));
                 }
 
                 var exportValues = queryable
@@ -84,13 +84,13 @@ namespace store_management.Features.Exports
 
                 var result = await queryable.Select(q => new ExportEnvelope {
                     NoBillRemainQuantity = q.NoBillRemainQuantity ?? 0,
-                    Id = q.ProductId,
-                    Name = q.Product.Name,
-                    Pattern = q.Product.Pattern,
-                    Size = q.Product.Size,
-                    Type = q.Product.Type,
-                    Brand = q.Product.Brand,
-                    RefPrice = q.Product.RefPrice
+                    Id = q.Id,
+                    Name = q.ProductImport.Product.Name,
+                    Pattern = q.ProductImport.Product.Pattern,
+                    Size = q.ProductImport.Product.Size,
+                    Type = q.ProductImport.Product.Type,
+                    Brand = q.ProductImport.Product.Brand,
+                    RefPrice = q.ProductImport.Product.RefPrice
                 }).ToListAsync(cancellationToken);
 
                 return new ExportsEnvelope

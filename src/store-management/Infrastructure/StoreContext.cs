@@ -106,8 +106,8 @@ namespace store_management.Domain
             {
                 entity.ToTable("PRODUCT_EXPORT");
 
-                entity.HasIndex(e => e.ProductId)
-                    .HasName("FK_NBP_PRODUCT");
+                entity.HasIndex(e => e.ProductImportId)
+                    .HasName("FK_PRODUCT_EXPORT_PRODUCT_IMPORT");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
@@ -119,8 +119,8 @@ namespace store_management.Domain
                     .HasColumnName("NOT_BILL_REMAIN_QUANTITY")
                     .HasColumnType("int(11)");
 
-                entity.Property(e => e.ProductId)
-                    .HasColumnName("PRODUCT_ID")
+                entity.Property(e => e.ProductImportId)
+                    .HasColumnName("PRODUCT_IMPORT_ID")
                     .HasColumnType("varchar(50)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
@@ -467,7 +467,7 @@ namespace store_management.Domain
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.ProductSale)
                     .HasForeignKey(d => d.ProductId)
-                    .HasConstraintName("FK_PRODUCT_SALE_PRODUCT_IMPORT");
+                    .HasConstraintName("FK_PRODUCT_SALE_PRODUCT");
 
                 entity.HasOne(d => d.Transaction)
                     .WithMany(p => p.ProductSale)
