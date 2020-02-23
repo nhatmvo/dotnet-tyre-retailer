@@ -135,13 +135,13 @@ namespace store_management.Features.Sale
                             }
                             else // if a product don't have any product import which has quantity left
                             {
-                                throw new RestException(HttpStatusCode.BadRequest, new { });
+                                throw new RestException(HttpStatusCode.Conflict, new { Error = "Số lượng sản phẩm không đủ" });
                             }
                             _context.ProductImport.UpdateRange(productImports);
 
                         } 
                         else
-                            throw new RestException(HttpStatusCode.Conflict, new { });
+                            throw new RestException(HttpStatusCode.Conflict, new { Error = "Sản phẩm được bán không tồn tại" });
                     }
                     
                     await _context.ProductSale.AddRangeAsync(saleUnits, cancellationToken);
@@ -150,7 +150,7 @@ namespace store_management.Features.Sale
                     return new SaleEnvelope(saleUnits);
                 }
                 else
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Giá trị nhập vào không hợp lệ" });
             }
         }
     }
