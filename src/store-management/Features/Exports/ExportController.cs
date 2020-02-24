@@ -25,10 +25,10 @@ namespace store_management.Features.Exports
         /// </summary>
         /// <param name="filter">Tryền vào như bên Filter của Product</param>
         /// <returns></returns>
-        [HttpGet]
-        public Task<ExportsEnvelope> List([FromQuery] ProductsFilter filter)
-        {
-            return _mediator.Send(new List.Query(filter));
-        } 
+        //[HttpGet]
+        //public Task<ExportsEnvelope> List([FromQuery] ProductsFilter filter)
+        //{
+        //    return _mediator.Send(new List.Query(filter));
+        //} 
     }
 }

@@ -391,6 +391,10 @@ namespace store_management.Domain
                     .HasColumnName("REMAIN_QUANTITY")
                     .HasColumnType("int(11)");
 
+                entity.Property(e => e.ExportableAmount)
+                    .HasColumnName("EXPORTABLE_QUANITTY")
+                    .HasColumnType("int(11)");
+
                 entity.Property(e => e.ProductId)
                     .IsRequired()
                     .HasColumnName("PRODUCT_ID")

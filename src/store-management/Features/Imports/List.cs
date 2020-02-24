@@ -12,7 +12,7 @@ namespace store_management.Features.Imports
 {
     public class List
     {
-        public class TransactionFilter
+        public class ImportTransactionFilter
         {
             public string ProductId { get; set; }
             public DateTime? FromDate { get; set; }
@@ -23,7 +23,7 @@ namespace store_management.Features.Imports
 
         public class Query : IRequest<ImportsEnvelope>
         {
-            public TransactionFilter Filter { get; set; }
+            public ImportTransactionFilter Filter { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, ImportsEnvelope>
@@ -37,8 +37,7 @@ namespace store_management.Features.Imports
 
             public async Task<ImportsEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
-                var queryable = _context.Transaction.Where(t => t.Type.Equals(TransactionType.IMPORT))
-                    .Include(t => t.ProductImport);
+                var queryable = _context.ProductImport;
 
                 if (request.Filter != null)
                 {
@@ -48,13 +47,13 @@ namespace store_management.Features.Imports
                         queryable.Where(t => t.Date <= request.Filter.ToDate);
                     if (!string.IsNullOrEmpty(request.Filter.ProductId))
                     {
-
+                        queryable.Where(pi => pi.ProductId.Equals(request.Filter.ProductId));
                     }
-                    var transactions = await queryable
+                    var imports = await queryable
                         .Skip(request.Filter.Offset ?? 0)
                         .Take(request.Filter.Limit ?? 10)
                         .AsNoTracking().ToListAsync(cancellationToken);
-                    return new ImportsEnvelope(transactions);
+                    return new ImportsEnvelope(imports);
                 }
                  ;
                 return new ImportsEnvelope(await queryable.Skip(0).Take(10)

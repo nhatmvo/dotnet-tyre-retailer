@@ -20,6 +20,7 @@ namespace store_management.Domain
         public decimal? CurrentImportPrice { get; set; }
         public int? ImportAmount { get; set; }
         public int? RemainQuantity { get; set; }
+        public int? ExportableAmount { get; set; }
         [NotMapped]
         public int ProductTotalQuantity { get; set; }
         [JsonIgnore]

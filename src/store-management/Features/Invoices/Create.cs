@@ -16,7 +16,7 @@ namespace store_management.Features.Invoices
 	{
 		public class InvoiceData
 		{
-			public string ProductExportId { get; set; }
+			public string ProductImportId { get; set; }
 			public int ExportAmount { get; set; }
 			public decimal? ExportPrice { get; set; }
 		}
@@ -33,7 +33,7 @@ namespace store_management.Features.Invoices
 		{
 			public InvoiceDataValidator()
 			{
-				RuleFor(x => x.ProductExportId).NotNull().NotEmpty();
+				RuleFor(x => x.ProductImportId).NotNull().NotEmpty();
 			}
 		}
 
@@ -90,16 +90,15 @@ namespace store_management.Features.Invoices
 				foreach (var item in request.InvoiceLinesData)
 				{
 
-					var notBillingProduct = await _context.ProductExport
-						.Include(pe => pe.ProductImport).ThenInclude(pi => pi.Product)
-						.FirstOrDefaultAsync(pe => pe.Id.Equals(item.ProductExportId));
+					var notBillingProduct = await _context.ProductImport
+						.FirstOrDefaultAsync(pe => pe.Id.Equals(item.ProductImportId));
 
 					if (notBillingProduct == null)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
-					if (notBillingProduct.NoBillRemainQuantity < item.ExportAmount)
+					if (notBillingProduct.ExportableAmount < item.ExportAmount)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
 
-					var exportPrice = item.ExportPrice ?? notBillingProduct.ProductImport.Product.RefPrice;
+					var exportPrice = item.ExportPrice ?? notBillingProduct.ImportPrice;
 					var invoiceLine = new InvoiceLine()
 					{
 						ExportPrice = exportPrice,
@@ -107,13 +106,13 @@ namespace store_management.Features.Invoices
 						InvoiceId = invoice.Id,
 						ExportAmount = item.ExportAmount,
 						Total = exportPrice * item.ExportAmount,
-						ProductId = notBillingProduct.ProductImport.ProductId
+						ProductId = notBillingProduct.ProductId
 					};
 					lines.Add(invoiceLine);
 
 					// substract no bill remain quantity by export amount
-					notBillingProduct.NoBillRemainQuantity -= item.ExportAmount;
-					_context.ProductExport.Update(notBillingProduct);
+					notBillingProduct.ExportableAmount -= item.ExportAmount;
+					_context.ProductImport.Update(notBillingProduct);
 				}
 
 				invoice.Total = lines.Sum(l => l.Total);

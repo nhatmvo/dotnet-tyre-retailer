@@ -13,11 +13,11 @@ namespace store_management.Features.Imports
 
     public class ImportsEnvelope
     {
-        public List<Transaction> Transactions { get; set; }
+        public List<ProductImport> Imports { get; set; }
 
-        public ImportsEnvelope(List<Transaction> transactions)
+        public ImportsEnvelope(List<ProductImport> imports)
         {
-            Transactions = transactions;
+            Imports = imports;
         }
     }
 }

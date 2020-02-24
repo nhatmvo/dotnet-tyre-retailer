@@ -119,13 +119,6 @@ namespace store_management.Features.Sale
                                             Quantity = saleAmount
                                         });
                                         productImports[i].RemainQuantity -= saleAmount;
-                                        await _context.ProductExport.AddAsync(new ProductExport
-                                        {
-                                            Id = Guid.NewGuid().ToString(),
-                                            NoBillRemainQuantity = saleAmount,
-                                            ProductImportId = productImports[i].Id
-                                        });
-
                                         _context.ProductImport.UpdateRange(productImports);
 
                                         break;
@@ -141,12 +134,6 @@ namespace store_management.Features.Sale
                                             Quantity = productImports[i].RemainQuantity.Value
                                         });
                                         productImports[i].RemainQuantity = 0;
-                                        await _context.ProductExport.AddAsync(new ProductExport
-                                        {
-                                            Id = Guid.NewGuid().ToString(),
-                                            NoBillRemainQuantity = saleAmount,
-                                            ProductImportId = productImports[i].Id
-                                        });
                                         _context.ProductImport.UpdateRange(productImports);
                                     }
 
