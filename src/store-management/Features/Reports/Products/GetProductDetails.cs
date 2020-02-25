@@ -11,17 +11,17 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace store_management.Features.Reports
+namespace store_management.Features.Reports.Products
 {
-    public class ProdDetails
+    public class ProductReportFilter
     {
-        public class ProductReportFilter
-        {
-            public string ProductId { get; set; }
-            public DateTime? StartDate { get; set; }
-            public DateTime? EndDate { get; set; }
-        }
+        public string ProductId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
 
+    public class GetProductDetails
+    {
         public class ProductReportFilterValidator : AbstractValidator<ProductReportFilter>
         {
             public ProductReportFilterValidator()

@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static store_management.Features.Reports.ProdDetails;
+using store_management.Features.Reports.Products;
+using store_management.Features.Reports.Revenues;
 
 namespace store_management.Features.Reports
 {
@@ -20,10 +21,16 @@ namespace store_management.Features.Reports
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("ProductDetails")]
         public Task<ReportsEnvelope> List([FromQuery] ProductReportFilter filter)
         {
-            return _mediator.Send(new ProdDetails.Query(filter));
+            return _mediator.Send(new GetProductDetails.Query(filter));
+        }
+
+        [HttpGet("Revenues")]
+        public Task<RevenuesEnvelope> Get([FromQuery] RevenueParamsFilter filter)
+        {
+            return _mediator.Send(new GetRevenue.Query(filter));
         }
     }
 }
