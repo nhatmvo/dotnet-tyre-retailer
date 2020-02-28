@@ -46,6 +46,11 @@ namespace store_management.Features.Products
 
                 if (request.Filter == null) {
                     var result = await queryable.ToListAsync();
+                    result = result.Select(p => {
+                        p.RemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.RemainQuantity).GetValueOrDefault();
+                        p.NoBillRemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.ExportableAmount).GetValueOrDefault();
+                        return p;
+                    }).ToList();
                     return new ProductsEnvelope {
                         Products = result,
                         ProductsCount = result.Count(),
@@ -73,12 +78,19 @@ namespace store_management.Features.Products
                 }
 
                 
+
                 var products = await queryable
                     .Skip(request.Filter.Offset ?? 0)
                     .Take(request.Filter.Limit ?? 10)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
 
+                products = products.Select(p => { 
+                    p.RemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.RemainQuantity).GetValueOrDefault();
+                    p.NoBillRemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.ExportableAmount).GetValueOrDefault();
+                    return p; 
+                }).ToList();
+                
                 return new ProductsEnvelope()
                 {
                     Products = products,

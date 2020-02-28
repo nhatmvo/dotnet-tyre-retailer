@@ -20,15 +20,5 @@ namespace store_management.Features.Exports
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Lấy danh sách những sản phẩm đã bản nhưng chưa được xuất hóa đơn của Product
-        /// </summary>
-        /// <param name="filter">Tryền vào như bên Filter của Product</param>
-        /// <returns></returns>
-        //[HttpGet]
-        //public Task<ExportsEnvelope> List([FromQuery] ProductsFilter filter)
-        //{
-        //    return _mediator.Send(new List.Query(filter));
-        //} 
     }
 }

@@ -8,20 +8,26 @@ namespace store_management.Features.Reports.Revenues
 {
     public class RevenuesEnvelope
     {
-        public List<Dictionary<DateTime, RevenueByDay>> Revenues { get; set; }
+
+        public List<ChartData> Data { get;set; }
         public decimal TotalRevenues { get; set; }
         public decimal TotalVirtualRevenues { get; set; }
-        public int TotalExportQuantity { get; set; }
-        public int TotalSoldQuantity { get; set; }
+        public decimal TotalImportPrice { get; set; }
     }
 
-    public class RevenueByDay
+    public class ChartData
     {
-        public int SoldAmountByDay { get; set; }
-        public decimal RevenuesByDay { get; set; }
-        [JsonIgnore]
-        public decimal TotalImportPriceByDay { get; set; }
+        public string Name { get; set; }
+        public List<ChartElement> Series { get; set; }
     }
+
+
+    public class ChartElement
+    {
+        public DateTime Name { get; set; }
+        public decimal Value { get; set; }
+    }
+
 
     public class RevenueParamsFilter
     {

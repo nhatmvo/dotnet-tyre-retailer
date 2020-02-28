@@ -68,9 +68,9 @@ namespace store_management.Features.Reports.Products
                 {
                     var queryable = _context.Product.Where(p => p.Id.Equals(request.Filter.ProductId))
                         .Include(p => p.ProductImport)
-                        .Include(p => p.ProductSale)
-                        .Include(p => p.InvoiceLine).AsQueryable();
-
+                        .Include(p => p.ProductSale).ThenInclude(ps => ps.Transaction)
+                        .Include(p => p.InvoiceLine).ThenInclude(il => il.Invoice).AsQueryable();
+                    
                     if (request.Filter.StartDate != null)
                     {
                         queryable = queryable.Where(p => p.ProductImport.Any(pi => pi.Date > request.Filter.StartDate) 

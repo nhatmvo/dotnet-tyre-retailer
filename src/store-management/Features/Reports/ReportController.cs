@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using store_management.Features.Reports.Products;
 using store_management.Features.Reports.Revenues;
+using store_management.Features.Reports.Stocks;
 
 namespace store_management.Features.Reports
 {
@@ -31,6 +32,12 @@ namespace store_management.Features.Reports
         public Task<RevenuesEnvelope> Get([FromQuery] RevenueParamsFilter filter)
         {
             return _mediator.Send(new GetRevenue.Query(filter));
+        }
+
+        [HttpGet("Stocks")]
+        public Task<StockEnvelope> Get([FromQuery] StockParemsFilter filter)
+        {
+            return _mediator.Send(new GetStock.Query(filter));
         }
     }
 }

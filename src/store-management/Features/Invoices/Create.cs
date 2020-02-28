@@ -66,24 +66,27 @@ namespace store_management.Features.Invoices
 				var lines = new List<InvoiceLine>();
 
 				var existedCustomer = await HandleExistedCustomer(request.CustomerData.TaxCode);
-
-				var customer = existedCustomer ?? new Customer()
+				var customerId = Guid.NewGuid().ToString();
+				if (existedCustomer == null)
 				{
-					Address = request.CustomerData.Address,
-					BankAccountNumber = request.CustomerData.BankAccountNumber,
-					FullName = request.CustomerData.FullName,
-					Id = Guid.NewGuid().ToString(),
-					TaxCode = request.CustomerData.TaxCode
-				};
-
-
+					var customer = new Customer()
+					{
+						Address = request.CustomerData.Address,
+						BankAccountNumber = request.CustomerData.BankAccountNumber,
+						FullName = request.CustomerData.FullName,
+						Id = customerId,
+						TaxCode = request.CustomerData.TaxCode
+					};
+					await _context.Customer.AddAsync(customer);
+				}
+				customerId = existedCustomer != null ? existedCustomer.Id : customerId;
 
 				var invoice = new Invoice()
 				{
 					Id = Guid.NewGuid().ToString(),
 					ExportDate = DateTime.Now,
 					InvoiceNo = (new Random()).Next(10000000, 99999999),
-					CustomerId = customer.Id
+					CustomerId = customerId
 				};
 
 
@@ -116,7 +119,6 @@ namespace store_management.Features.Invoices
 				}
 
 				invoice.Total = lines.Sum(l => l.Total);
-				await _context.Customer.AddAsync(customer);
 				await _context.Invoice.AddAsync(invoice);
 				await _context.InvoiceLine.AddRangeAsync(lines);
 

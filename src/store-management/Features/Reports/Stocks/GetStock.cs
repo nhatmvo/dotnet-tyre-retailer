@@ -8,35 +8,37 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace store_management.Features.Reports.Revenues
+namespace store_management.Features.Reports.Stocks
 {
-    public class GetRevenue
+    public class GetStock
     {
-        public class Query : IRequest<RevenuesEnvelope>
+        public class Query : IRequest<StockEnvelope>
         {
             public Query() { }
 
-            public Query(RevenueParamsFilter filter) 
+            public Query(StockParemsFilter filter)
             {
                 Filter = filter;
             }
 
-            public RevenueParamsFilter Filter { get; set; }
+            public StockParemsFilter Filter { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, RevenuesEnvelope>
+        public class QueryHandler : IRequestHandler<Query, StockEnvelope>
         {
             private readonly StoreContext _context;
 
-            public Handler(StoreContext context)
+            public QueryHandler(StoreContext context)
             {
                 _context = context;
             }
 
-            public async Task<RevenuesEnvelope> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<StockEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 if (request.Filter != null)
                 {
+                    var chartLineNames = new List<string> { "Số lượng nhập", "Số lượng bán", "Số lượng xuất" };
+
                     #region Assign Datetime Value
                     DateTime now = DateTime.Now;
                     // if none of Datetime Filter has value => StartDate and EndDate will be set in a current month
@@ -44,18 +46,16 @@ namespace store_management.Features.Reports.Revenues
                     {
                         request.Filter.StartDate = (new DateTime(now.Year, now.Month, 1)).AddHours(0).AddMinutes(0).AddSeconds(0);
                         request.Filter.EndDate = request.Filter.StartDate.Value.AddMonths(1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
-                    } else if (!request.Filter.StartDate.HasValue)
+                    }
+                    else if (!request.Filter.StartDate.HasValue)
                         request.Filter.StartDate = (new DateTime(now.Year, now.Month, 1)).AddHours(0).AddMinutes(0).AddSeconds(0);
                     else if (!request.Filter.EndDate.HasValue)
                         request.Filter.EndDate = now;
                     #endregion
 
-                    var chartLineNames = new List<string> { "Doanh thu", "Doanh thu ảo", "Giá nhập" };
-
                     var productInfoByDate = _context.Transaction.Include(p => p.ProductImport).Include(p => p.ProductSale);
-
-                    var revenueReport = new RevenuesEnvelope();
-                    revenueReport.Data = new List<ChartData>();
+                    var stockReport = new StockEnvelope();
+                    stockReport.Data = new List<ChartData>();
 
                     foreach (string lineName in chartLineNames)
                     {
@@ -67,58 +67,54 @@ namespace store_management.Features.Reports.Revenues
                         {
                             var firstDayMoment = day.Date.AddHours(0).AddMinutes(0).AddSeconds(0);
                             var lastDayMoment = day.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                            var infoByDay = await productInfoByDate.Where(pbd => pbd.Date >= firstDayMoment && pbd.Date <= lastDayMoment).ToListAsync();
-                            var exportByDay = await _context.Invoice.Where(i => i.ExportDate >= firstDayMoment && i.ExportDate <= lastDayMoment).ToListAsync();
 
-                            var chartElement = new ChartElement();
+                            var infoByDay = await productInfoByDate.Where(pbd => pbd.Date >= firstDayMoment && pbd.Date <= lastDayMoment).ToListAsync();
+                            var exportByDay = await _context.Invoice.Include(i => i.InvoiceLine).Where(i => i.ExportDate >= firstDayMoment && i.ExportDate <= lastDayMoment).ToListAsync();
+
+                            var chartElement = new ChartElement(); 
+
                             switch (lineName)
                             {
-                                case "Doanh thu":
+                                case "Số lượng nhập":
                                     chartElement = new ChartElement()
                                     {
                                         Name = day,
-                                        Value = infoByDay.Sum(i => i.ProductSale.Sum(pi => pi.SaleAmount * pi.SalePrice)).GetValueOrDefault() -
-                                            infoByDay.Sum(i => i.ProductImport.Sum(pi => pi.ImportAmount * pi.ImportPrice)).GetValueOrDefault()
+                                        Value = infoByDay.Sum(i => i.ProductImport.Sum(pi => pi.ImportAmount)).GetValueOrDefault()
                                     };
                                     chartData.Series.Add(chartElement);
-                                    revenueReport.TotalRevenues += chartElement.Value;
+                                    stockReport.TotalImports += chartElement.Value;
                                     break;
-                                case "Doanh thu ảo":
+                                case "Số lượng bán":
                                     chartElement = new ChartElement()
                                     {
                                         Name = day,
-                                        Value = exportByDay.Sum(i => i.InvoiceLine.Sum(i => i.ExportAmount * i.ExportPrice)).GetValueOrDefault() -
-                                            infoByDay.Sum(i => i.ProductImport.Sum(pi => pi.ImportAmount * pi.ImportPrice)).GetValueOrDefault()
+                                        Value = infoByDay.Sum(i => i.ProductSale.Sum(pi => pi.SaleAmount)).GetValueOrDefault()
                                     };
                                     chartData.Series.Add(chartElement);
-                                    revenueReport.TotalVirtualRevenues += chartElement.Value;
+                                    stockReport.TotalSold += chartElement.Value;
                                     break;
-                                case "Giá nhập":
+                                case "Số lượng xuất":
                                     chartElement = new ChartElement()
                                     {
                                         Name = day,
-                                        Value = infoByDay.Sum(i => i.ProductImport.Sum(i => i.ImportAmount * i.ImportPrice)).GetValueOrDefault()
+                                        Value = exportByDay.Sum(i => i.InvoiceLine.Sum(i => i.ExportAmount)).GetValueOrDefault()
                                     };
                                     chartData.Series.Add(chartElement);
-                                    revenueReport.TotalImportPrice += chartElement.Value;
+                                    stockReport.TotalExports += chartElement.Value;
                                     break;
                                 default:
                                     break;
                             }
                         }
-                        revenueReport.Data.Add(chartData);
+                        stockReport.Data.Add(chartData);
                     }
                     
-                    return revenueReport;
+
+                    return stockReport;
 
                 }
-                return new RevenuesEnvelope();
-                
+                return new StockEnvelope();
             }
         }
-
-
-
-
     }
 }

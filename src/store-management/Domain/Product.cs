@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace store_management.Domain
 {
@@ -20,6 +21,11 @@ namespace store_management.Domain
         public string Pattern { get; set; }
         public string ImagePath { get; set; }
         public decimal? RefPrice { get; set; }
+        [NotMapped]
+        public int NoBillRemainQuantity { get; set; }
+        [NotMapped]
+        public int RemainQuantity { get; set; }
+        [JsonIgnore]
         public int TotalQuantity { get; set; }
         public string Description { get; set; }
         public DateTime? CreatedDate { get; set; }
