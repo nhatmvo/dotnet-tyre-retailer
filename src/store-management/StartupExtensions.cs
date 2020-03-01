@@ -42,7 +42,8 @@ namespace store_management
                 // Validate the token expiry
                 ValidateLifetime = true,
                 // If you want to allow a certain amount of clock drift, set that here:
-                ClockSkew = TimeSpan.FromHours(24)
+                ClockSkew = TimeSpan.FromHours(24),
+                
             };
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

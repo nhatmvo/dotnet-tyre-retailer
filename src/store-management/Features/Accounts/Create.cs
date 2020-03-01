@@ -19,6 +19,7 @@ namespace store_management.Features.Accounts
         {
             public string Username { get; set; }
             public string Password { get; set; }
+            public string Role { get; set; }
 
         }
 
@@ -28,6 +29,7 @@ namespace store_management.Features.Accounts
             {
                 RuleFor(x => x.Username).NotNull().NotEmpty();
                 RuleFor(x => x.Password).NotNull().NotEmpty().MinimumLength(8);
+                
             }
         }
 
@@ -63,6 +65,8 @@ namespace store_management.Features.Accounts
                 {
                     throw new RestException(HttpStatusCode.BadRequest, new { Username = Constants.IN_USE });
                 }
+                if (string.IsNullOrEmpty(command.AccountData.Role))
+                    command.AccountData.Role = "User";
 
                 var salt = Guid.NewGuid().ToByteArray();
                 var account = new Account
@@ -70,12 +74,15 @@ namespace store_management.Features.Accounts
                     Id = Guid.NewGuid().ToString(),
                     Username = command.AccountData.Username,
                     Hash = _passwordHasher.Hash(command.AccountData.Password, salt),
-                    Salt = salt
+                    Salt = salt,
+                    Role = command.AccountData.Role
                 };
+
+                var claimsIdentity = await _jwtTokenGenerator.GetClaimsIdentity(account.Username, account.Role);
 
                 _context.Account.Add(account);
                 await _context.SaveChangesAsync(cancellationToken);
-                account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
+                account.Token = await _jwtTokenGenerator.CreateToken(claimsIdentity);
                 return new AccountEnvelope(account);
 
             }

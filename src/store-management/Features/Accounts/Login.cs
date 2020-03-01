@@ -75,9 +75,13 @@ namespace store_management.Features.Accounts
                     throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Người dùng nhập sai tài khoản / mật khẩu" });
                 }
 
-                account.Token = await _jwtTokenGenerator.CreateToken(account.Username);
+                var claimsIdentity = await _jwtTokenGenerator.GetClaimsIdentity(account.Username, account.Role);
+
+                account.Token = await _jwtTokenGenerator.CreateToken(claimsIdentity);
                 return new AccountEnvelope(account);
             }
         }
+
+
     }
 }

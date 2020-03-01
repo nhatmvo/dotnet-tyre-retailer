@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +12,8 @@ namespace store_management.Infrastructure.Security
 {
     public interface IJwtTokenGenerator
     {
-        Task<string> CreateToken(string username);
+        public Task<string> CreateToken(ClaimsIdentity identity);
+        public Task<ClaimsIdentity> GetClaimsIdentity(string username, string role);
     }
 
     public class JwtTokenGenerator : IJwtTokenGenerator
@@ -22,26 +25,38 @@ namespace store_management.Infrastructure.Security
             _jwtOptions = jwtOptions.Value;
         }
 
-        public async Task<string> CreateToken(string username)
+        public async Task<string> CreateToken(ClaimsIdentity identity)
         {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
-                new Claim(JwtRegisteredClaimNames.Iat,
-                    new DateTimeOffset(_jwtOptions.IssuedAt).ToUnixTimeSeconds().ToString(),
-                    ClaimValueTypes.Integer64)
-            };
+            var claims = identity.Claims;
+
             var jwt = new JwtSecurityToken(
                 _jwtOptions.Issuer,
                 _jwtOptions.Audience,
-                claims,
+                claims ,
                 _jwtOptions.NotBefore,
                 _jwtOptions.Expiration,
                 _jwtOptions.SigningCredentials);
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             return encodedJwt;
+        }
+
+
+        public async Task<ClaimsIdentity> GetClaimsIdentity(string username, string role)
+        {
+            Claim[] claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
+                new Claim(JwtRegisteredClaimNames.Iat,
+                    new DateTimeOffset(_jwtOptions.IssuedAt).ToUnixTimeSeconds().ToString(),
+                    ClaimValueTypes.Integer64),
+                new Claim(ClaimTypes.Name, username)
+            };
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token");
+            claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role));
+
+            return claimsIdentity;
         }
     }
 }

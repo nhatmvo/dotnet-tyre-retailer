@@ -35,6 +35,7 @@ namespace store_management.Features.Imports
         /// <returns></returns>
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+        [Authorize(Roles = "Admin")]
         public async Task<ImportEnvelope> Create(Create.Command command)
         {
             return await _mediator.Send(command);

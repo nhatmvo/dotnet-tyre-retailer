@@ -24,6 +24,7 @@ namespace store_management.Domain
 
         [JsonIgnore]
         public byte[] Hash { get; set; }
+        public string Role { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Invoice> Invoice { get; set; }
