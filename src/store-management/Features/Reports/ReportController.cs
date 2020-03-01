@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using store_management.Features.Reports.Products;
 using store_management.Features.Reports.Revenues;
 using store_management.Features.Reports.Stocks;
+using store_management.Infrastructure.Security;
 
 namespace store_management.Features.Reports
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     public class ReportController : ControllerBase
     {
@@ -23,6 +23,7 @@ namespace store_management.Features.Reports
         }
 
         [HttpGet("ProductDetails")]
+        
         public Task<ReportsEnvelope> List([FromQuery] ProductReportFilter filter)
         {
             return _mediator.Send(new GetProductDetails.Query(filter));

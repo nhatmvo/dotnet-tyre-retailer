@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using store_management.Infrastructure.Security;
 
 namespace store_management.Features.Accounts
 {
     [Route("api/[controller]")]
+    
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -20,6 +19,8 @@ namespace store_management.Features.Accounts
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+        [Authorize(Roles = "Admin")]
         public async Task<AccountEnvelope> Create([FromBody] Create.Command command)
         {
             return await _mediator.Send(command);

@@ -12,6 +12,7 @@ using store_management.Infrastructure.Security;
 namespace store_management.Features.Customers
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
     [ApiController]
     public class CustomerController : ControllerBase
     {
@@ -42,16 +43,20 @@ namespace store_management.Features.Customers
             return await _mediator.Send(command);
         }
 
+
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+        [Authorize(Roles = "Admin")]
         public async Task<CustomerEnvelope> Edit(string id, [FromBody] Edit.Command command)
         {
             command.Id = id;
             return await _mediator.Send(command);
         }
 
+
         [HttpDelete]
         [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+        [Authorize(Roles = "Admin")]
         public async Task Delete(string id)
         {
             await _mediator.Send(new Delete.Command(id));

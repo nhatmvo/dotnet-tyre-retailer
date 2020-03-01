@@ -12,6 +12,7 @@ namespace store_management.Features.Products
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
     public class ProductController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,21 +29,19 @@ namespace store_management.Features.Products
         }
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<ProductEnvelope> Create([FromBody] Create.Command command)
         {
             return await _mediator.Send(command);
         }
 
         [HttpPut]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<ProductEnvelope> Edit([FromBody] Edit.Command command)
         {
             return await _mediator.Send(command);
         }
 
         [HttpDelete]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
+        [Authorize(Roles = "Admin")]
         public async Task Delete(string id)
         {
             await _mediator.Send(new Delete.Command(id));

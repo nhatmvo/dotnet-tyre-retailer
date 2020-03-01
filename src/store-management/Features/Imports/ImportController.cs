@@ -14,6 +14,7 @@ namespace store_management.Features.Imports
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
     public class ImportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,8 +35,6 @@ namespace store_management.Features.Imports
         /// </param>
         /// <returns></returns>
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
-        [Authorize(Roles = "Admin")]
         public async Task<ImportEnvelope> Create(Create.Command command)
         {
             return await _mediator.Send(command);

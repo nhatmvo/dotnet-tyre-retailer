@@ -12,6 +12,7 @@ namespace store_management.Features.Invoices
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
     public class InvoiceController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -27,7 +28,6 @@ namespace store_management.Features.Invoices
         /// <param name="command"></param>
         /// <returns></returns>
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<InvoiceEnvelope> Create(Create.Command command)
         {
             // Features\Invoices\Create.cs
