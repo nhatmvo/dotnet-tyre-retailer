@@ -36,21 +36,27 @@ namespace store_management.Features.Products
 
         }
 
-        public ProductsFilter (string type, string size, string brand, string pattern, int limit, int offset)
+        public ProductsFilter (string type, string size, string brand, string pattern, int pageSize, int pageIndex, int noBillQuantityGt)
         {
             Type = type;
             Size = size;
             Brand = brand;
             Pattern = pattern;
-            Limit = limit;
-            Offset = offset;
+            PageSize = pageSize;
+            PageIndex = pageIndex;
+            NoBillQuantityGt = noBillQuantityGt;
+            //Limit = limit;
+            //Offset = offset;
         }
         public string Type { get; set; }
         public string Size { get; set; }
         public string Brand { get; set; }
         public string Pattern { get; set; }
-        public int? Limit { get; set; }
-        public int? Offset { get; set; }
+        public int? PageSize { get; set; }
+        public int? PageIndex { get; set; }
+        public int NoBillQuantityGt { get; set; }
+        //public int? Limit { get; set; }
+        //public int? Offset { get; set; }
 
     }
 }

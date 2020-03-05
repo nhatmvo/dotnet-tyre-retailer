@@ -75,13 +75,11 @@ namespace store_management.Features.Products
                 if (!string.IsNullOrEmpty(request.Filter.Size))
                 {
                     queryable = queryable.Where(q => separateFilterOptions(request.Filter.Size.ToLower()).Contains(q.Pattern.ToLower()));
-                }
-
-                
+                }                
 
                 var products = await queryable
-                    .Skip(request.Filter.Offset ?? 0)
-                    .Take(request.Filter.Limit ?? 10)
+                    .Skip(request.Filter.PageIndex != null && request.Filter.PageSize != null ? request.Filter.PageIndex.Value * request.Filter.PageSize.Value : 0)
+                    .Take(request.Filter.PageSize ?? 10)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
 
@@ -91,6 +89,11 @@ namespace store_management.Features.Products
                     return p; 
                 }).ToList();
                 
+                if (request.Filter.NoBillQuantityGt != null)
+                {
+                    products = products.Where(p => p.NoBillRemainQuantity > request.Filter.NoBillQuantityGt).ToList();
+                }
+
                 return new ProductsEnvelope()
                 {
                     Products = products,

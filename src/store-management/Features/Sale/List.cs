@@ -16,8 +16,8 @@ namespace store_management.Features.Sale
         {
             public DateTime? FromDate { get; set; }
             public DateTime? ToDate { get; set; }
-            public int? Limit { get; set; }
-            public int? Offset { get; set; }
+            public int? PageIndex { get; set; }
+            public int? PageSize { get; set; }
         }
 
         public class Query : IRequest<SalesEnvelope>
@@ -46,8 +46,8 @@ namespace store_management.Features.Sale
                     if (request.Filter.ToDate.HasValue)
                         queryable.Where(t => t.Date <= request.Filter.ToDate);
                     var transactions = await queryable
-                        .Skip(request.Filter.Offset ?? 0)
-                        .Take(request.Filter.Limit ?? 10)
+                        .Skip(request.Filter.PageIndex != null && request.Filter.PageSize != null ? request.Filter.PageIndex.Value * request.Filter.PageSize.Value : 0)
+                        .Take(request.Filter.PageSize ?? 10)
                         .AsNoTracking().ToListAsync(cancellationToken);
                     return new SalesEnvelope(transactions);
                 }
