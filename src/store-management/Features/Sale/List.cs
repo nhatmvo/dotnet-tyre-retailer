@@ -37,14 +37,14 @@ namespace store_management.Features.Sale
             public async Task<SalesEnvelope> Handle(Query request, CancellationToken cancellationToken)
             {
                 var queryable = _context.Transaction.Where(t => t.Type.Equals(TransactionType.SOLD))
-                    .Include(t => t.ProductSale);
+                    .Include(t => t.ProductSale).AsQueryable();
                 
                 if (request.Filter != null)
                 {
                     if (request.Filter.FromDate.HasValue)
-                        queryable.Where(t => t.Date >= request.Filter.FromDate);
+                        queryable = queryable.Where(t => t.Date >= request.Filter.FromDate);
                     if (request.Filter.ToDate.HasValue)
-                        queryable.Where(t => t.Date <= request.Filter.ToDate);
+                        queryable = queryable.Where(t => t.Date <= request.Filter.ToDate);
                     var transactions = await queryable
                         .Skip(request.Filter.PageIndex != null && request.Filter.PageSize != null ? request.Filter.PageIndex.Value * request.Filter.PageSize.Value : 0)
                         .Take(request.Filter.PageSize ?? 10)

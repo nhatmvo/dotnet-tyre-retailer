@@ -21,7 +21,6 @@ namespace store_management.Domain
         public string Pattern { get; set; }
         public string ImagePath { get; set; }
         public decimal? RefPrice { get; set; }
-        [NotMapped]
         public int NoBillRemainQuantity { get; set; }
         [NotMapped]
         public int RemainQuantity { get; set; }

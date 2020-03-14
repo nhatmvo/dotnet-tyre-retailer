@@ -85,14 +85,10 @@ namespace store_management.Features.Products
 
                 products = products.Select(p => { 
                     p.RemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.RemainQuantity).GetValueOrDefault();
-                    p.NoBillRemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(p.Id)).Sum(pi => pi.ExportableAmount).GetValueOrDefault();
                     return p; 
                 }).ToList();
-                
-                if (request.Filter.NoBillQuantityGt != null)
-                {
-                    products = products.Where(p => p.NoBillRemainQuantity > request.Filter.NoBillQuantityGt).ToList();
-                }
+
+                products = products.Where(p => p.NoBillRemainQuantity > request.Filter.NoBillQuantityGt).ToList();
 
                 return new ProductsEnvelope()
                 {

@@ -14,4 +14,14 @@ namespace store_management.Features.Customers
             Customer = customer;
         }
     }
+
+    public class CustomersEnvelope
+    {
+        public List<Customer> Customers { get; set; }
+
+        public CustomersEnvelope(List<Customer> customers)
+        {
+            Customers = customers;
+        }
+    }
 }

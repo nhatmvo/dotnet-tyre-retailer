@@ -164,7 +164,8 @@ namespace store_management.Features.Imports
                     Size = data.Size,
                     RefPrice = data.ImportPrice,
                     //CreatedBy = ,
-                    CreatedDate = _now
+                    CreatedDate = _now,
+                    NoBillRemainQuantity = 0
                 };
                 return productToCreate;
 

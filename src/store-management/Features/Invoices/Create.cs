@@ -14,6 +14,9 @@ namespace store_management.Features.Invoices
 {
 	public class Create
 	{
+		// Flow muốn export hóa đơn:
+		// 1. Chọn lô hàng muốn export
+		// 2. Chọn giá và số lượng muốn export
 		public class InvoiceData
 		{
 			public string ProductImportId { get; set; }
@@ -95,11 +98,16 @@ namespace store_management.Features.Invoices
 
 					var notBillingProduct = await _context.ProductImport
 						.FirstOrDefaultAsync(pe => pe.Id.Equals(item.ProductImportId));
-
+					
+					// điều kiện để export hóa đơn: 
+					// Product phải tồn tại
+					// Số lượng xuất của hóa đơn phải nhỏ hơn số lượng có thể xuất của sản phẩm
+					// Số lượng xuất của hóa đơn phải nhỏ hơn số lượng đã bán của sản phẩm đó (số đã bán mà chưa xuất hóa đơn)
 					if (notBillingProduct == null)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
 					if (notBillingProduct.ExportableAmount < item.ExportAmount)
 						throw new RestException(HttpStatusCode.BadRequest, new { });
+					// Check số lượng đã bán của sản phẩm đó
 
 					var exportPrice = item.ExportPrice ?? notBillingProduct.ImportPrice;
 					var invoiceLine = new InvoiceLine()

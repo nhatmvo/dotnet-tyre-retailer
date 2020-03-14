@@ -36,8 +36,14 @@ namespace store_management.Features.Customers
             return await _mediator.Send(new Details.Query(taxCode));
         }
 
+        [HttpGet]
+        public async Task<CustomersEnvelope> List([FromQuery] List.Query filter)
+        {
+            return await _mediator.Send(filter);
+        }
+
+
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         public async Task<CustomerEnvelope> Create([FromBody] Create.Command command)
         {
             return await _mediator.Send(command);
@@ -45,7 +51,6 @@ namespace store_management.Features.Customers
 
 
         [HttpPut]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         [Authorize(Roles = "Admin")]
         public async Task<CustomerEnvelope> Edit(string id, [FromBody] Edit.Command command)
         {
@@ -55,7 +60,6 @@ namespace store_management.Features.Customers
 
 
         [HttpDelete]
-        [Authorize(AuthenticationSchemes = JwtIssuerOptions.Schemes)]
         [Authorize(Roles = "Admin")]
         public async Task Delete(string id)
         {

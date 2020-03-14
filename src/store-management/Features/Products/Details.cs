@@ -79,7 +79,7 @@ namespace store_management.Features.Products
                         if (product == null)
                             throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
                     }
-                    product.NoBillRemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(request.Id)).Sum(pi => pi.ExportableAmount).GetValueOrDefault();
+                    
                     product.RemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(request.Id)).Sum(pi => pi.RemainQuantity).GetValueOrDefault();
                     return new ProductEnvelope(product);
                 } else

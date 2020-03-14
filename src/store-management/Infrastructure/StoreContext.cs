@@ -358,6 +358,10 @@ namespace store_management.Domain
                     .HasColumnType("varchar(100)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.NoBillRemainQuantity)
+                    .HasColumnName("NO_BILL_QUANTITY")
+                    .HasColumnType("int(11)");
             });
 
             modelBuilder.Entity<ProductImport>(entity =>

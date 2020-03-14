@@ -90,7 +90,8 @@ namespace store_management.Features.Sale
                         {
                             if (productToSell.TotalQuantity < item.SaleAmount) // if sale amount is greater than available quantity a product has
                                 throw new RestException(HttpStatusCode.Conflict, new { Error = "Số lượng bán nhiều hơn số lượng sản phẩm có trong kho" });
-
+                            productToSell.NoBillRemainQuantity += item.SaleAmount;
+                            _context.Product.Update(productToSell);
                             // when selling a product, the oldest Product Import with remaining quantity higher than 0 will be substracted
                             var productImports = productToSell.ProductImport.Where(pi => pi.RemainQuantity > 0).OrderBy(pi => pi.Date).ToList();
                             if (productImports.Count != 0)
