@@ -104,10 +104,13 @@ namespace store_management.Features.Invoices
 					// Số lượng xuất của hóa đơn phải nhỏ hơn số lượng có thể xuất của sản phẩm
 					// Số lượng xuất của hóa đơn phải nhỏ hơn số lượng đã bán của sản phẩm đó (số đã bán mà chưa xuất hóa đơn)
 					if (notBillingProduct == null)
-						throw new RestException(HttpStatusCode.BadRequest, new { });
+						throw new RestException(HttpStatusCode.BadRequest, new { Error = "Lô hàng nhập vào không tồn tại" });
 					if (notBillingProduct.ExportableAmount < item.ExportAmount)
-						throw new RestException(HttpStatusCode.BadRequest, new { });
+						throw new RestException(HttpStatusCode.BadRequest, new { Error = "Số lượng xuất hóa đơn không được nhiều hơn số lượng có thể xuất trong lô" });
 					// Check số lượng đã bán của sản phẩm đó
+					var product = await _context.Product.Where(p => p.Id.Equals(notBillingProduct.ProductId)).FirstOrDefaultAsync();
+					if (product != null && product.NoBillRemainQuantity < item.ExportAmount)
+						throw new RestException(HttpStatusCode.BadRequest, new { Error = "Số lượng xuất hóa đơn không được nhiều hơn số lượng đã bán" });
 
 					var exportPrice = item.ExportPrice ?? notBillingProduct.ImportPrice;
 					var invoiceLine = new InvoiceLine()
