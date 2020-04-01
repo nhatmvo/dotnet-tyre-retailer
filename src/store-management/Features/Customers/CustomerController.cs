@@ -36,7 +36,7 @@ namespace store_management.Features.Customers
             return await _mediator.Send(new Details.Query(taxCode));
         }
 
-        [HttpGet]
+        [HttpGet("List")]
         public async Task<CustomersEnvelope> List([FromQuery] List.Query filter)
         {
             return await _mediator.Send(filter);
