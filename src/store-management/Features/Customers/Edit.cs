@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
@@ -39,10 +41,14 @@ namespace store_management.Features.Customers
         public class Handler : IRequestHandler<Command, CustomerEnvelope>
         {
             private readonly StoreContext _context;
+            private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly Logger _logger;
 
-            public Handler(StoreContext context)
+            public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor, Logger logger)
             {
                 _context = context;
+                _currentUserAccessor = currentUserAccessor;
+                _logger = new Logger();
             }
 
             public async Task<CustomerEnvelope> Handle(Command request, CancellationToken cancellationToken)
@@ -62,6 +68,9 @@ namespace store_management.Features.Customers
                 customer.TaxCode = request.Customer.TaxNumber ?? customer.TaxCode;
 
                 _context.Customer.Update(customer);
+                var username = _currentUserAccessor.GetCurrentUsername();
+                _logger.AddLog(_context, username, username + " sửa thông tin khách hàng " + customer.FullName, "Sửa đổi");
+
                 await _context.SaveChangesAsync();
 
                 return new CustomerEnvelope(customer);

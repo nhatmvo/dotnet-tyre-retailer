@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 
 namespace store_management.Features.Customers
 {
@@ -49,11 +51,14 @@ namespace store_management.Features.Customers
         {
 
             private readonly StoreContext _context;
-            //private readonly 
+            private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly Logger _logger;
 
-            public Handler(StoreContext context)
+            public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
+                _logger = new Logger();
                 _context = context;
+                _currentUserAccessor = currentUserAccessor;
             }
 
 
@@ -71,7 +76,9 @@ namespace store_management.Features.Customers
                     BankAccountNumber = command.Customer.BankAccount,
                     FullName = command.Customer.FullName
                 };
-
+                // Ghi log
+                var username = _currentUserAccessor.GetCurrentUsername();
+                _logger.AddLog(_context, username, username + " thêm mới khách hàng " + customer.FullName, "Thêm mới");
                 await _context.Customer.AddAsync(customer, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 

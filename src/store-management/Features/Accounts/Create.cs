@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using store_management.Infrastructure.Security;
 using System;
@@ -51,16 +53,21 @@ namespace store_management.Features.Accounts
             private readonly StoreContext _context;
             private readonly IPasswordHasher _passwordHasher;
             private readonly IJwtTokenGenerator _jwtTokenGenerator;
-            
-            public Handler(StoreContext context, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator)
+            private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly Logger _logger;
+
+            public Handler(StoreContext context, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
                 _passwordHasher = passwordHasher;
                 _jwtTokenGenerator = jwtTokenGenerator;
+                _currentUserAccessor = currentUserAccessor;
+                _logger = new Logger();
             }
 
             public async Task<AccountEnvelope> Handle(Command command, CancellationToken cancellationToken)
             {
+                // Tạo mới tài khoản
                 if (await _context.Account.Where(x => x.Username.Equals(command.AccountData.Username)).AnyAsync(cancellationToken))
                 {
                     throw new RestException(HttpStatusCode.BadRequest, new { Username = Constants.IN_USE });
@@ -79,8 +86,14 @@ namespace store_management.Features.Accounts
                 };
 
                 var claimsIdentity = await _jwtTokenGenerator.GetClaimsIdentity(account.Username, account.Role);
+                
+                // Ghi log
+                var username = _currentUserAccessor.GetCurrentUsername();
+                _logger.AddLog(_context, username, username + " thêm mới người dùng " + account.Username, "Thêm mới");
 
                 _context.Account.Add(account);
+
+
                 await _context.SaveChangesAsync(cancellationToken);
                 account.Token = await _jwtTokenGenerator.CreateToken(claimsIdentity);
                 return new AccountEnvelope(account);

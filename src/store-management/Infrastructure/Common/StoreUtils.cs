@@ -13,4 +13,5 @@ namespace store_management.Infrastructure.Common
                 yield return day;
         }
     }
+
 }

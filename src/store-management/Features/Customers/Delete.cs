@@ -3,6 +3,8 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
@@ -36,10 +38,16 @@ namespace store_management.Features.Customers
         {
 
             private readonly StoreContext _context;
+            private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly Logger _logger; 
 
-            public Handler(StoreContext context)
+
+            public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
+                _currentUserAccessor = currentUserAccessor;
+                _logger = new Logger();
+                
             }
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
@@ -53,6 +61,9 @@ namespace store_management.Features.Customers
                 }
 
                 _context.Customer.Remove(customer);
+                var username = _currentUserAccessor.GetCurrentUsername();
+                _logger.AddLog(_context, username, username + " xóa thông tin khách hàng " + customer.FullName, "Xóa");
+
                 await _context.SaveChangesAsync(cancellationToken);
 
                 return Unit.Value;

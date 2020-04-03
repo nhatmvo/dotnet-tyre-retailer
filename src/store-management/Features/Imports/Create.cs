@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using store_management.Domain;
 using store_management.Features.Imports;
+using store_management.Infrastructure;
 using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
@@ -60,17 +61,18 @@ namespace store_management.Features.Imports
         {
 
             private readonly StoreContext _context;
+            private readonly ICurrentUserAccessor _currentUserAccessor;
             private readonly DateTime _now;
 
-            public Handler(StoreContext context)
+            public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
+                _currentUserAccessor = currentUserAccessor;
                 _now = DateTime.Now;
             }
 
             public async Task<ImportEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
-                
                 var validator = (new CommandValidator()).Validate(request);
                 if (validator.IsValid)
                 {
