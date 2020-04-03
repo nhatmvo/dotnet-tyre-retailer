@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace store_management.Infrastructure.Common
 {
-    public class Logger
+    public class CustomLogger
     {
+        public CustomLogger() {}
+        
         public void AddLog(StoreContext context, string username, string message, string action)
         {
             if (username == null) throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Người dùng không tồn tại trong hệ thống" });

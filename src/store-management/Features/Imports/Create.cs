@@ -8,7 +8,8 @@ using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+    using System.Globalization;
+    using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,12 +63,14 @@ namespace store_management.Features.Imports
 
             private readonly StoreContext _context;
             private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly CustomLogger _logger;   
             private readonly DateTime _now;
 
             public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
                 _currentUserAccessor = currentUserAccessor;
+                _logger = new CustomLogger();
                 _now = DateTime.Now;
             }
 
@@ -93,20 +96,23 @@ namespace store_management.Features.Imports
                         Date = _now,
                         Note = request.Note
                     };
-                    await _context.Transaction.AddAsync(transaction);
+                    await _context.Transaction.AddAsync(transaction, cancellationToken);
+                    
+                    var username = _currentUserAccessor.GetCurrentUsername();
 
                     foreach (var item in request.ImportsData)
                     {
                         // for each product created or updated, the following tables is also inserted
                         //  1. Product - contains information about a Product
-                        //  2. PriceFluctuation - updated with lastest price of a product
+                        //  2. PriceFluctuation - updated with latest price of a product
                         //  3. IeReport - using for export & import information when create report
                         var product = await GetProductByProps(item.Pattern, item.Type, item.Brand, item.Size);
                         string productId;
                         if (product == null)
                         {
                             productId = Guid.NewGuid().ToString();
-                            productsInsert.Add(GetCreateProduct(productId, item));
+                            product = GetCreateProduct(productId, item);
+                            productsInsert.Add(product);
                         }
                         else
                         {
@@ -125,16 +131,18 @@ namespace store_management.Features.Imports
                             TransactionId = transactionId,
                             ProductTotalQuantity = product != null ? product.TotalQuantity + item.ImportAmount : item.ImportAmount
                         };
+                        // Add logg
+                        _logger.AddLog(_context, username, username + " thêm sản phẩm " + product.Name + ", số lượng " + item.ImportAmount + ", giá " + item.ImportPrice  + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
                         productImports.Add(productImport);
 
 
                     }
-                    await _context.Product.AddRangeAsync(productsInsert);
+                    await _context.Product.AddRangeAsync(productsInsert, cancellationToken);
                     _context.Product.UpdateRange(productsUpdate);
 
-                    await _context.ProductImport.AddRangeAsync(productImports);
+                    await _context.ProductImport.AddRangeAsync(productImports, cancellationToken);
 
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(cancellationToken);
 
                     return new ImportEnvelope
                     {
@@ -187,7 +195,7 @@ namespace store_management.Features.Imports
                 var handledResult = new List<ImportData>();
                 foreach (var item in importsData)
                 {
-                    var existedItem = handledResult.Where(a => a.Brand.Equals(item.Brand) && a.Type.Equals(item.Type) && a.Pattern.Equals(item.Pattern) && a.Size.Equals(item.Size)).FirstOrDefault();
+                    var existedItem = handledResult.FirstOrDefault(a => a.Brand.Equals(item.Brand) && a.Type.Equals(item.Type) && a.Pattern.Equals(item.Pattern) && a.Size.Equals(item.Size));
                     if (existedItem != null)
                     {
                         if (existedItem.ImportPrice != item.ImportPrice) throw new RestException(HttpStatusCode.BadRequest, new { });

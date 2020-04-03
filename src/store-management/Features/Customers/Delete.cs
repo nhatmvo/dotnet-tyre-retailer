@@ -39,14 +39,14 @@ namespace store_management.Features.Customers
 
             private readonly StoreContext _context;
             private readonly ICurrentUserAccessor _currentUserAccessor;
-            private readonly Logger _logger; 
+            private readonly CustomLogger _logger; 
 
 
             public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
                 _currentUserAccessor = currentUserAccessor;
-                _logger = new Logger();
+                _logger = new CustomLogger();
                 
             }
 

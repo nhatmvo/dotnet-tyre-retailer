@@ -54,7 +54,7 @@ namespace store_management.Features.Accounts
             private readonly IPasswordHasher _passwordHasher;
             private readonly IJwtTokenGenerator _jwtTokenGenerator;
             private readonly ICurrentUserAccessor _currentUserAccessor;
-            private readonly Logger _logger;
+            private readonly CustomLogger _logger;
 
             public Handler(StoreContext context, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator, ICurrentUserAccessor currentUserAccessor)
             {
@@ -62,7 +62,7 @@ namespace store_management.Features.Accounts
                 _passwordHasher = passwordHasher;
                 _jwtTokenGenerator = jwtTokenGenerator;
                 _currentUserAccessor = currentUserAccessor;
-                _logger = new Logger();
+                _logger = new CustomLogger();
             }
 
             public async Task<AccountEnvelope> Handle(Command command, CancellationToken cancellationToken)
