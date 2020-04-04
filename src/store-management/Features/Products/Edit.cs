@@ -5,6 +5,7 @@ using store_management.Domain;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,21 +48,24 @@ namespace store_management.Features.Products
         {
             private readonly StoreContext _context;
             private readonly ICurrentUserAccessor _currentUserAccessor;
-
+            private readonly CustomLogger _logger;
+            private readonly DateTime _now;
 
             public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
                 _currentUserAccessor = currentUserAccessor;
+                _logger = new CustomLogger();
+                _now = DateTime.Now;
             }
 
             public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
             {
                 var productToUpdate = await _context.Product
-                    .FirstOrDefaultAsync(p => p.Id.Equals(request.Id));
+                    .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
                 if (productToUpdate == null)
                     throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
-
+                var username = _currentUserAccessor.GetCurrentUsername();
                 // check properties of product to insert
                 productToUpdate.Name = string.IsNullOrEmpty(request.ProductData.Name) ? productToUpdate.Name : request.ProductData.Name;
                 productToUpdate.Type = string.IsNullOrEmpty(request.ProductData.Type) ? productToUpdate.Type : request.ProductData.Type;
@@ -71,13 +75,18 @@ namespace store_management.Features.Products
                 productToUpdate.ImagePath = string.IsNullOrEmpty(request.ProductData.ImagePath) ? productToUpdate.ImagePath : request.ProductData.ImagePath;
                 productToUpdate.Description = string.IsNullOrEmpty(request.ProductData.Description) ? productToUpdate.Description : request.ProductData.Description;
 
-
+                
                 // Update last modify by and last modify date
                 productToUpdate.ModifiedDate = DateTime.Now;
+                productToUpdate.ModifiedBy = username;
+                
+                // Add logg
+                _logger.AddLog(_context, username, username + " sửa thông tin sản phẩm " + productToUpdate.Name + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Cập nhật");
 
+                
                 _context.Product.Update(productToUpdate);
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return new ProductEnvelope(productToUpdate);
                 

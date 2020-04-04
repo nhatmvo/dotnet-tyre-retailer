@@ -566,6 +566,10 @@ namespace store_management.Domain
                 entity.Property(e => e.Note)
                     .HasColumnName("NOTE")
                     .HasColumnType("varchar(5000)");
+
+                entity.Property(e => e.TransactionNo)
+                    .HasColumnName("TRANSACTION_NO")
+                    .HasColumnType("varchar(50)");
             });
 
             OnModelCreatingPartial(modelBuilder);

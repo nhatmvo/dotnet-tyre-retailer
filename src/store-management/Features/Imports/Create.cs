@@ -86,7 +86,9 @@ namespace store_management.Features.Imports
                     var productsInsert = new List<Product>();
                     var productsUpdate = new List<Product>();
                     var productImports = new List<ProductImport>();
-
+                    var transactionNo = StoreUtils.GenerateRandomSequence();
+                    var username = _currentUserAccessor.GetCurrentUsername();
+                    
                     // Create a transaction 
                     var transaction = new Transaction
                     {
@@ -94,12 +96,13 @@ namespace store_management.Features.Imports
                         Type = TransactionType.IMPORT,
                         Billing = false,
                         Date = _now,
-                        Note = request.Note
+                        Note = request.Note,
+                        TransactionNo =  transactionNo
+                        
                     };
                     await _context.Transaction.AddAsync(transaction, cancellationToken);
+                    _logger.AddLog(_context, username, username + " nhập lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
                     
-                    var username = _currentUserAccessor.GetCurrentUsername();
-
                     foreach (var item in request.ImportsData)
                     {
                         // for each product created or updated, the following tables is also inserted
@@ -132,7 +135,7 @@ namespace store_management.Features.Imports
                             ProductTotalQuantity = product != null ? product.TotalQuantity + item.ImportAmount : item.ImportAmount
                         };
                         // Add logg
-                        _logger.AddLog(_context, username, username + " thêm sản phẩm " + product.Name + ", số lượng " + item.ImportAmount + ", giá " + item.ImportPrice  + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
+                        _logger.AddLog(_context, username, username + " thêm sản phẩm " + product.Name + ", số lượng " + item.ImportAmount + ", giá " + item.ImportPrice  + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
                         productImports.Add(productImport);
 
 
@@ -150,7 +153,7 @@ namespace store_management.Features.Imports
                     };
                 } else
                 {
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Dữ liệu đầu vào không hợp lệ" });
                 }
             }
 

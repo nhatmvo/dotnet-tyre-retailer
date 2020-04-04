@@ -7,6 +7,7 @@ using store_management.Infrastructure.Common;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -58,12 +59,14 @@ namespace store_management.Features.Products
             private readonly StoreContext _context;
             private readonly DateTime _now;
             private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly CustomLogger _logger;
 
             public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _now = DateTime.Now;
                 _context = context;
                 _currentUserAccessor = currentUserAccessor;
+                _logger = new CustomLogger();
             }
 
             public async Task<ProductEnvelope> Handle(Command request, CancellationToken cancellationToken)
@@ -76,6 +79,8 @@ namespace store_management.Features.Products
                     if (product != null)
                         throw new RestException(HttpStatusCode.BadRequest, new { });
                     var productId = Guid.NewGuid().ToString();
+
+                    var username = _currentUserAccessor.GetCurrentUsername();
                     var productToCreate = new Product
                     {
                         Id = productId,
@@ -84,12 +89,14 @@ namespace store_management.Features.Products
                         Brand = request.ProductData.Brand,
                         Pattern = request.ProductData.Pattern,
                         Description = request.ProductData.Description,
-                        CreatedDate = _now
-                        // Add created person
+                        CreatedDate = _now,
+                        CreatedBy = username
                     };
+                    // Add logg
+                    _logger.AddLog(_context, username, username + " thêm mới thông tin sản phẩm " + productToCreate.Name + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
 
-                    await _context.Product.AddAsync(productToCreate);
-                    await _context.SaveChangesAsync();
+                    await _context.Product.AddAsync(productToCreate, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
 
                     return new ProductEnvelope(productToCreate);
                 }

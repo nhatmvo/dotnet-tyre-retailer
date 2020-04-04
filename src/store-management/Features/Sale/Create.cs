@@ -5,10 +5,13 @@ using store_management.Domain;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 
 namespace store_management.Features.Sale
 {
@@ -47,11 +50,15 @@ namespace store_management.Features.Sale
         public class Handler : IRequestHandler<Command, SaleEnvelope>
         {
             private readonly StoreContext _context;
+            private readonly ICurrentUserAccessor _currentUserAccessor;
+            private readonly CustomLogger _logger;
             private readonly DateTime _now;
 
-            public Handler(StoreContext context)
+            public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
             {
                 _context = context;
+                _currentUserAccessor = currentUserAccessor;
+                _logger = new CustomLogger();
                 _now = DateTime.Now;
             }
 
@@ -62,17 +69,23 @@ namespace store_management.Features.Sale
                 {
                     List<ProductSale> saleUnits = new List<ProductSale>();
                     List<ProductImport> productImportsToUpdate = new List<ProductImport>();
-
+                    var transactionNo = StoreUtils.GenerateRandomSequence();
+                    var username = _currentUserAccessor.GetCurrentUsername();
+                    
                     var transactionId = Guid.NewGuid().ToString();
                     var transaction = new Transaction
                     {
                         Id = transactionId,
                         Billing = false,
                         Type = "S",
-                        Date = _now
+                        Date = _now,
+                        TransactionNo = transactionNo
+                        
                     };
-
+                    
                     await _context.Transaction.AddAsync(transaction, cancellationToken);
+                    _logger.AddLog(_context, username, username + " bán lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
+
 
                     // When a product is sold, 3 tables will be updated:
                     // 1. Create Product Sale record
@@ -84,7 +97,7 @@ namespace store_management.Features.Sale
                     {
                         var productToSell = await _context.Product
                             .Include(p => p.ProductImport)
-                            .FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+                            .FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId), cancellationToken);
                             
                         if (productToSell != null)
                         {
@@ -147,6 +160,7 @@ namespace store_management.Features.Sale
                                 throw new RestException(HttpStatusCode.Conflict, new { Error = "Số lượng sản phẩm không đủ" });
                             }
                             // Product Export
+                            _logger.AddLog(_context, username, username + " bán sản phẩm " + productToSell.Name + ", số lượng " + item.SaleAmount + ", giá " + item.SalePrice  + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
 
                         } 
                         else

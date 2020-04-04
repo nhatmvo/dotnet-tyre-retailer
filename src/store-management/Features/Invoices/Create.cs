@@ -5,10 +5,13 @@ using store_management.Domain;
 using store_management.Infrastructure.Errors;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using store_management.Infrastructure;
+using store_management.Infrastructure.Common;
 
 namespace store_management.Features.Invoices
 {
@@ -22,6 +25,7 @@ namespace store_management.Features.Invoices
 			public string ProductImportId { get; set; }
 			public int ExportAmount { get; set; }
 			public decimal? ExportPrice { get; set; }
+			
 		}
 
 		public class CustomerData
@@ -44,6 +48,7 @@ namespace store_management.Features.Invoices
 		{
 			public List<InvoiceData> InvoiceLinesData { get; set; }
 			public CustomerData CustomerData { get; set; }
+			public int InvoiceNo { get; set; }
 		}
 
 		public class CommandValidator : AbstractValidator<Command>
@@ -58,10 +63,16 @@ namespace store_management.Features.Invoices
 		public class Handler : IRequestHandler<Command, InvoiceEnvelope>
 		{
 			private readonly StoreContext _context;
+			private readonly CustomLogger _logger;
+			private readonly ICurrentUserAccessor _currentUserAccessor;
+			private readonly DateTime _now;
 
-			public Handler(StoreContext context)
+			public Handler(StoreContext context, ICurrentUserAccessor currentUserAccessor)
 			{
 				_context = context;
+				_currentUserAccessor = currentUserAccessor;
+				_logger = new CustomLogger();
+				_now = DateTime.Now;
 			}
 
 			public async Task<InvoiceEnvelope> Handle(Command request, CancellationToken cancellationToken)
@@ -88,16 +99,16 @@ namespace store_management.Features.Invoices
 				{
 					Id = Guid.NewGuid().ToString(),
 					ExportDate = DateTime.Now,
-					InvoiceNo = (new Random()).Next(10000000, 99999999),
+					InvoiceNo = request.InvoiceNo,
 					CustomerId = customerId
 				};
-
-
+				var username = _currentUserAccessor.GetCurrentUsername();
+				_logger.AddLog(_context, username, username + " xuất hóa đơn với mã " + invoice.InvoiceNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
+				
 				foreach (var item in request.InvoiceLinesData)
 				{
-
 					var notBillingProduct = await _context.ProductImport
-						.FirstOrDefaultAsync(pe => pe.Id.Equals(item.ProductImportId));
+						.FirstOrDefaultAsync(pe => pe.Id.Equals(item.ProductImportId), cancellationToken);
 					
 					// điều kiện để export hóa đơn: 
 					// Product phải tồn tại
@@ -123,17 +134,21 @@ namespace store_management.Features.Invoices
 						ProductId = notBillingProduct.ProductId
 					};
 					lines.Add(invoiceLine);
+					
+					_logger.AddLog(_context, username, username + " xuất hóa đơn với sản phẩm " + notBillingProduct.Product.Name + ", số lượng " + invoiceLine.ExportAmount + ", số lượng " + invoiceLine.ExportPrice + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
 
 					// substract no bill remain quantity by export amount
 					notBillingProduct.ExportableAmount -= item.ExportAmount;
 					_context.ProductImport.Update(notBillingProduct);
+					
+					
 				}
 
 				invoice.Total = lines.Sum(l => l.Total);
-				await _context.Invoice.AddAsync(invoice);
-				await _context.InvoiceLine.AddRangeAsync(lines);
-
-				await _context.SaveChangesAsync();
+				await _context.Invoice.AddAsync(invoice, cancellationToken);
+				await _context.InvoiceLine.AddRangeAsync(lines, cancellationToken);
+				
+				await _context.SaveChangesAsync(cancellationToken);
 
 				return new InvoiceEnvelope(invoice);
 			}
