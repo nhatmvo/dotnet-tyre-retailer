@@ -103,7 +103,7 @@ namespace store_management.Features.Invoices
 					CustomerId = customerId
 				};
 				var username = _currentUserAccessor.GetCurrentUsername();
-				_logger.AddLog(_context, username, username + " xuất hóa đơn với mã " + invoice.InvoiceNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
+				_logger.AddLog(_context, username, username + " xuất hóa đơn mã " + invoice.InvoiceNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
 				
 				foreach (var item in request.InvoiceLinesData)
 				{
@@ -135,7 +135,7 @@ namespace store_management.Features.Invoices
 					};
 					lines.Add(invoiceLine);
 					
-					_logger.AddLog(_context, username, username + " xuất hóa đơn với sản phẩm " + notBillingProduct.Product.Name + ", số lượng " + invoiceLine.ExportAmount + ", số lượng " + invoiceLine.ExportPrice + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
+					_logger.AddLog(_context, username, username + " xuất hóa đơn với sản phẩm " + notBillingProduct.Product.Name + ", số lượng " + invoiceLine.ExportAmount + ", với giá " + invoiceLine.ExportPrice + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại hóa đơn số " + invoice.InvoiceNo, "Tạo mới");
 
 					// substract no bill remain quantity by export amount
 					notBillingProduct.ExportableAmount -= item.ExportAmount;

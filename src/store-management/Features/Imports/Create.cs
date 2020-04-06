@@ -101,7 +101,7 @@ namespace store_management.Features.Imports
                         
                     };
                     await _context.Transaction.AddAsync(transaction, cancellationToken);
-                    _logger.AddLog(_context, username, username + " nhập lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
+                    _logger.AddLog(_context, username, username + " nhập lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
                     
                     foreach (var item in request.ImportsData)
                     {
