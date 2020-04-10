@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using store_management.Features.Reports.Logs;
 using store_management.Features.Reports.Products;
 using store_management.Features.Reports.Revenues;
 using store_management.Features.Reports.Stocks;
@@ -39,6 +40,12 @@ namespace store_management.Features.Reports
         public Task<StockEnvelope> Get([FromQuery] StockParemsFilter filter)
         {
             return _mediator.Send(new GetStock.Query(filter));
+        }
+
+        [HttpGet("Logs")]
+        public Task<LogsEnvelope> Get([FromQuery] LogFilter filter)
+        {
+            return _mediator.Send(new ListLog.Query(filter));
         }
     }
 }

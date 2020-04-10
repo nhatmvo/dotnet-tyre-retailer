@@ -84,7 +84,7 @@ namespace store_management.Features.Sale
                     };
                     
                     await _context.Transaction.AddAsync(transaction, cancellationToken);
-                    _logger.AddLog(_context, username, username + " bán lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture) + " tại lô " + transactionNo, "Tạo mới");
+                    _logger.AddLog(_context, username, username + " bán lô hàng mã " + transactionNo + " vào ngày " + _now.ToString(CultureInfo.CurrentCulture), "Tạo mới");
 
 
                     // When a product is sold, 3 tables will be updated:
