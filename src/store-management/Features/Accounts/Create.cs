@@ -70,7 +70,7 @@ namespace store_management.Features.Accounts
                 // Tạo mới tài khoản
                 if (await _context.Account.Where(x => x.Username.Equals(command.AccountData.Username)).AnyAsync(cancellationToken))
                 {
-                    throw new RestException(HttpStatusCode.BadRequest, new { Username = Constants.IN_USE });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Tên đăng nhập đã tồn tại trong hệ thống" });
                 }
                 if (string.IsNullOrEmpty(command.AccountData.Role))
                     command.AccountData.Role = "User";

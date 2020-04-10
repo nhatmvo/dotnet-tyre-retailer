@@ -124,7 +124,7 @@ namespace store_management.Features.Invoices
 						throw new RestException(HttpStatusCode.BadRequest, new { Error = "Số lượng xuất hóa đơn không được nhiều hơn số lượng đã bán" });
 					if (product != null)
 						product.NoBillRemainQuantity -= item.ExportAmount;
-					else throw new RestException(HttpStatusCode.NotFound, new { Error = "Sản phẩm xuất không tồn tại trong hệ thống" });
+					else throw new RestException(HttpStatusCode.NotFound, new { Error = "Không tồn tại sản phẩm trong hệ thống" });
 					
 					var exportPrice = item.ExportPrice ?? notBillingProduct.ImportPrice;
 					var invoiceLine = new InvoiceLine()

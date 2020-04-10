@@ -67,7 +67,7 @@ namespace store_management.Features.Customers
 
                 var existedCustomer = await _context.Customer.FirstOrDefaultAsync(c => c.TaxCode.Equals(command.Customer.TaxNumber));
                 if (existedCustomer != null)
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Khách hàng đã tồn tại trong hệ thống"});
                 var customer = new Customer()
                 {
                     Id = Guid.NewGuid().ToString(),

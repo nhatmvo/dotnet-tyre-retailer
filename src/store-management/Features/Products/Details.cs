@@ -67,7 +67,7 @@ namespace store_management.Features.Products
                         product = await _context.Product
                             .FirstOrDefaultAsync(p => p.Id.Equals(request.Id), cancellationToken);
                         if (product == null)
-                            throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
+                            throw new RestException(HttpStatusCode.NotFound, new { Error = "Sản phẩm không tồn tại trong hệ thống" });
                     }
                     else if (request.ProductData != null)
                     {
@@ -77,14 +77,14 @@ namespace store_management.Features.Products
                             && p.Size.Equals(request.ProductData.Size)
                             && p.Type.Equals(request.ProductData.Type));
                         if (product == null)
-                            throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
+                            throw new RestException(HttpStatusCode.NotFound, new { Error = "Sản phẩm không tồn tại trong hệ thống" });
                     }
                     
                     product.RemainQuantity = _context.ProductImport.Where(pi => pi.ProductId.Equals(request.Id)).Sum(pi => pi.RemainQuantity).GetValueOrDefault();
                     return new ProductEnvelope(product);
                 } else
                 {
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Dữ liệu đầu vào không hợp lệ" });
                 }
                 
                 

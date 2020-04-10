@@ -48,7 +48,7 @@ namespace store_management.Features.Products
                 var product = await _context.Product
                     .FirstOrDefaultAsync(p => p.Id.Equals(request.ToString()) , cancellationToken);
                 if (product == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Product = Constants.NOT_FOUND });
+                    throw new RestException(HttpStatusCode.NotFound, new { Error = "Không tìm thấy sản phẩm trong hệ thống" });
 
                 _context.Product.Remove(product);
                 await _context.SaveChangesAsync();

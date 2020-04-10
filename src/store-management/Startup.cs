@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using store_management.Domain;
 using store_management.Infrastructure;
+using store_management.Infrastructure.Errors;
 using store_management.Infrastructure.Security;
 
 namespace store_management
@@ -85,7 +86,6 @@ namespace store_management
             services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
             services.AddTransient<IPasswordHasher, PasswordHasher>();
             services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
-
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors();
             services.AddMvc(option => option.EnableEndpointRouting = false)
@@ -102,6 +102,8 @@ namespace store_management
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             app.UseSwagger();
 

@@ -46,7 +46,7 @@ namespace store_management.Features.Invoices
                     .Include(i => i.InvoiceLine)
                     .FirstOrDefaultAsync(i => i.InvoiceNo.Equals(request.InvoiceNo));
                 if (invoice == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { });
+                    throw new RestException(HttpStatusCode.NotFound, new { Error = "Không tồn tại mã hóa đơn trong hệ thống" });
                 return new InvoiceEnvelope(invoice);
             }
         }

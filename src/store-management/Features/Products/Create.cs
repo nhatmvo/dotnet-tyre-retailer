@@ -77,7 +77,7 @@ namespace store_management.Features.Products
                     var product = await _context.Product.FirstOrDefaultAsync(p => p.Type.Equals(request.ProductData.Type)
                             && p.Name.Equals(request.ProductData.Name) && p.Brand.Equals(request.ProductData.Brand) && p.Pattern.Equals(request.ProductData.Pattern));
                     if (product != null)
-                        throw new RestException(HttpStatusCode.BadRequest, new { });
+                        throw new RestException(HttpStatusCode.BadRequest, new { Error = "Sản phẩm đã tồn tại trong hệ thống" });
                     var productId = Guid.NewGuid().ToString();
 
                     var username = _currentUserAccessor.GetCurrentUsername();
@@ -101,7 +101,7 @@ namespace store_management.Features.Products
                     return new ProductEnvelope(productToCreate);
                 }
                 else
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Dữ liệu đầu vào không hợp lệ" });
 
 
             }

@@ -53,7 +53,7 @@ namespace store_management.Features.Imports
                     };
                 }
                 else
-                    throw new RestException(HttpStatusCode.BadRequest, new { });
+                    throw new RestException(HttpStatusCode.BadRequest, new { Error = "Dữ liệu đầu vào không hợp lệ" });
             }
         }
     }

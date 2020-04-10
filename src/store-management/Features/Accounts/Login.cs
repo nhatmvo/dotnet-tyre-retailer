@@ -66,13 +66,13 @@ namespace store_management.Features.Accounts
                 var account = await _context.Account.Where(x => x.Username == request.Account.Username).SingleOrDefaultAsync(cancellationToken);
                 if (account == null)
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Người dùng nhập sai tài khoản / mật khẩu" });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Tài khoản không tồn tại trong hệ thống" });
 
                 }
 
                 if (!account.Hash.SequenceEqual(_passwordHasher.Hash(request.Account.Password, account.Salt)))
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Người dùng nhập sai tài khoản / mật khẩu" });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Mật khẩu của tài khoản không chính xác" });
                 }
 
                 var claimsIdentity = await _jwtTokenGenerator.GetClaimsIdentity(account.Username, account.Role);

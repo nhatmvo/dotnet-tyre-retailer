@@ -58,7 +58,7 @@ namespace store_management.Features.Customers
                 
                 if (customer == null)
                 {
-                    throw new RestException(HttpStatusCode.NotFound, new { Customer = Constants.NOT_FOUND });
+                    throw new RestException(HttpStatusCode.NotFound, new { Error = "Khách hàng không tồn tại trong hệ thống" });
 
                 }
 
