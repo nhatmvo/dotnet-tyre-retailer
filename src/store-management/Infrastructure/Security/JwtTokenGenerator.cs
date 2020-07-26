@@ -51,10 +51,10 @@ namespace store_management.Infrastructure.Security
                 new Claim(JwtRegisteredClaimNames.Iat,
                     new DateTimeOffset(_jwtOptions.IssuedAt).ToUnixTimeSeconds().ToString(),
                     ClaimValueTypes.Integer64),
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role)
             };
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token");
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role));
 
             return claimsIdentity;
         }
